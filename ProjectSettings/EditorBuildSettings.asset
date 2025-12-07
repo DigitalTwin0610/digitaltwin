@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/LGArtCenter_SignatureHall.unity
+    guid: aa0cd5a1ab7ed0d4eaac8a0b9ba01196
   m_configObjects: {}
