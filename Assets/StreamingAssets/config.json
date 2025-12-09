@@ -1,0 +1,10 @@
+{
+  "claudeApiKey": "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",
+  "papagoClientId": "YOUR_PAPAGO_CLIENT_ID",
+  "papagoClientSecret": "tNQbPahKMcoWhM2Dp4BQryPR3oWlEjVNJoCwa7Sh",
+  "openWeatherApiKey": "YOUR_OPENWEATHER_KEY",
+  "firebaseUrl": "https://YOUR_PROJECT.firebaseio.com",
+  "mqttServerUrl": "https://YOUR_CLOUDTYPE_URL.cloudtype.app",
+  "serialPort": "COM3",
+  "cityName": "Seoul"
+}
