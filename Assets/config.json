@@ -1,0 +1,7 @@
+{
+  "claudeApiKey": "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",
+  "openWeatherApiKey": "b4be92e16edb175203f2b6126b008cd0",
+  "firebaseUrl": "https://emolamp-default-rtdb.firebaseio.com/",
+  "mqttServerUrl": "https://port-0-motorcontrol-miqbz64b349f00ff.sel3.cloudtype.app",
+  "cityName": "Seoul"
+}

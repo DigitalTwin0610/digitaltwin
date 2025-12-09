@@ -12,7 +12,6 @@ public class UIManager : MonoBehaviour
     [Header("=== Managers ===")]
     [SerializeField] private WeatherManager weatherManager;
     [SerializeField] private ClaudeManager claudeManager;
-    [SerializeField] private PapagoManager papagoManager;
     [SerializeField] private FirebaseManager firebaseManager;
     [SerializeField] private MQTTManager mqttManager;
     [SerializeField] private HSVController hsvController;
@@ -85,7 +84,6 @@ public class UIManager : MonoBehaviour
         // 컴포넌트 자동 찾기
         if (weatherManager == null) weatherManager = FindObjectOfType<WeatherManager>();
         if (claudeManager == null) claudeManager = FindObjectOfType<ClaudeManager>();
-        if (papagoManager == null) papagoManager = FindObjectOfType<PapagoManager>();
         if (firebaseManager == null) firebaseManager = FindObjectOfType<FirebaseManager>();
         if (mqttManager == null) mqttManager = FindObjectOfType<MQTTManager>();
         if (hsvController == null) hsvController = FindObjectOfType<HSVController>();
@@ -305,18 +303,8 @@ public class UIManager : MonoBehaviour
 
         Log($"분석 시작: {text}");
 
-        // 한국어가 아니면 번역
-        if (papagoManager != null && !PapagoManager.IsKorean(text))
-        {
-            papagoManager.Translate(text, (translated) =>
-            {
-                PerformAnalysis(translated);
-            });
-        }
-        else
-        {
-            PerformAnalysis(text);
-        }
+        // Claude가 다국어를 직접 이해하므로 바로 분석
+        PerformAnalysis(text);
     }
 
     private void PerformAnalysis(string text)

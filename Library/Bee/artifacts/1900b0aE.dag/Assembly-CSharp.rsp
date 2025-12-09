@@ -362,7 +362,6 @@
 "Assets/Scripts/API/ClaudeManager.cs"
 "Assets/Scripts/API/FirebaseManager.cs"
 "Assets/Scripts/API/MQTTManager.cs"
-"Assets/Scripts/API/PapagoManager.cs"
 "Assets/Scripts/API/WeatherManager.cs"
 "Assets/Scripts/Core/BackgroundController.cs"
 "Assets/Scripts/Core/HSVController.cs"
