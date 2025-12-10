@@ -137,7 +137,7 @@ public class LampController : MonoBehaviour
         if (serialController != null && serialController.IsConnected)
         {
             serialController.SendRGB(r, g, b);
-            Log($"물리 LED 전송: RGB({r},{g},{b})");
+            Log($"Physical LED Send: RGB({r},{g},{b})");
         }
     }
 
@@ -190,7 +190,7 @@ public class LampController : MonoBehaviour
         // 4. 이벤트 발생
         OnLampColorChanged?.Invoke(color);
 
-        Log($"램프 색상 적용: RGB({r},{g},{b}) / HEX: #{ColorUtility.ToHtmlStringRGB(color)}");
+        Log($"Apply lamp color: RGB({r},{g},{b}) / HEX: #{ColorUtility.ToHtmlStringRGB(color)}");
     }
 
     #endregion

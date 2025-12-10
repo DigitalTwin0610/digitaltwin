@@ -66,13 +66,13 @@ public class MQTTManager : MonoBehaviour
     {
         if (IsConnected)
         {
-            Log("이미 연결됨");
+            Log("Already connected");
             return;
         }
 
         if (string.IsNullOrEmpty(serverUrl) || serverUrl.Contains("your-app"))
         {
-            LogError("서버 URL이 설정되지 않았습니다.");
+            LogError("Invalid server URL");
             return;
         }
 
@@ -92,7 +92,7 @@ public class MQTTManager : MonoBehaviour
 
         IsConnected = false;
         OnDisconnected?.Invoke();
-        Log("연결 해제됨");
+        Log("Disconnected from server");
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class MQTTManager : MonoBehaviour
     {
         if (!IsConnected)
         {
-            LogError("연결되지 않음");
+            LogError("Not connected to server");
             return;
         }
 
@@ -141,7 +141,7 @@ public class MQTTManager : MonoBehaviour
 
     private IEnumerator ConnectCoroutine()
     {
-        Log($"서버 연결 시도: {serverUrl}");
+        Log($"Trying to connect: {serverUrl}");
 
         // 서버 상태 확인
         string url = $"{serverUrl}/api/status";
@@ -154,7 +154,7 @@ public class MQTTManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 IsConnected = true;
-                Log("서버 연결 성공");
+                Log("Success to Connect");
                 OnConnected?.Invoke();
 
                 // 폴링 시작
@@ -162,7 +162,7 @@ public class MQTTManager : MonoBehaviour
             }
             else
             {
-                LogError($"서버 연결 실패: {request.error}");
+                LogError($"Failed Connected: {request.error}");
                 OnError?.Invoke(request.error);
                 IsConnected = false;
             }
@@ -193,7 +193,7 @@ public class MQTTManager : MonoBehaviour
                 }
                 else if (request.result == UnityWebRequest.Result.ConnectionError)
                 {
-                    LogError("연결 끊김");
+                    LogError("Connection lost");
                     IsConnected = false;
                     OnDisconnected?.Invoke();
                     break;
@@ -206,7 +206,7 @@ public class MQTTManager : MonoBehaviour
     {
         try
         {
-            Log($"폴링 응답: {json}");
+            Log($"Pulling Response: {json}");
 
             // 간단한 메시지 파싱
             // 형식: {"topic":"emolamp/state","payload":"{...}","timestamp":123456}
@@ -225,7 +225,7 @@ public class MQTTManager : MonoBehaviour
                         payload = payload.Replace("\\\"", "\"").Replace("\\\\", "\\");
                     }
 
-                    Log($"메시지 수신: [{topic}] {payload}");
+                    Log($"Recieve Massage: [{topic}] {payload}");
                     OnMessageReceived?.Invoke(topic, payload);
 
                     if (long.TryParse(timestampStr, out long timestamp))
@@ -237,7 +237,7 @@ public class MQTTManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            LogError($"폴링 응답 파싱 오류: {e.Message}");
+            LogError($"Polling Response Parsing Error: {e.Message}");
         }
     }
 
@@ -268,11 +268,11 @@ public class MQTTManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Log("발행 완료");
+                Log("Publish Success");
             }
             else
             {
-                LogError($"발행 실패: {request.error}");
+                LogError($"Publish Failed: {request.error}");
                 OnError?.Invoke(request.error);
             }
         }

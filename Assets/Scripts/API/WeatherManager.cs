@@ -51,7 +51,7 @@ public class WeatherManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_API_KEY")
         {
-            LogError("API 키가 설정되지 않았습니다.");
+            LogError("Please set the API key.");
             // 테스트용 기본값 설정
             SetDefaultWeather();
             return;
@@ -104,7 +104,7 @@ public class WeatherManager : MonoBehaviour
     private IEnumerator FetchWeatherCoroutine()
     {
         IsLoading = true;
-        Log($"날씨 정보 요청: {cityName}");
+        Log($"request weather INFO: {cityName}");
 
         string url = $"{API_URL}?q={cityName}&appid={apiKey}&units=metric&lang=kr";
 
@@ -118,7 +118,7 @@ public class WeatherManager : MonoBehaviour
             }
             else
             {
-                LogError($"날씨 API 오류: {request.error}");
+                LogError($"Weather API error: {request.error}");
                 SetDefaultWeather();
             }
         }
@@ -130,7 +130,7 @@ public class WeatherManager : MonoBehaviour
     {
         try
         {
-            Log($"응답: {json}");
+            Log($"Response: {json}");
 
             // 간단한 JSON 파싱 (Newtonsoft 없이)
             WeatherData data = new WeatherData();
@@ -187,13 +187,13 @@ public class WeatherManager : MonoBehaviour
             data.timestamp = DateTime.Now;
 
             CurrentWeather = data;
-            Log($"날씨 파싱 완료: {data.temperature}°C, {data.conditionText}, {data.description}");
+            Log($"Weather Parsing Error: {data.temperature}C, {data.conditionText}, {data.description}");
 
             OnWeatherUpdated?.Invoke(data);
         }
         catch (Exception e)
         {
-            LogError($"날씨 파싱 오류: {e.Message}");
+            LogError($"Weather Parsing Error: {e.Message}");
             SetDefaultWeather();
         }
     }
@@ -224,12 +224,12 @@ public class WeatherManager : MonoBehaviour
             humidity = 50,
             condition = WeatherCondition.Clouds,
             conditionText = "Clouds",
-            description = "구름 조금",
+            description = "No Cloud",
             cityName = cityName,
             timestamp = DateTime.Now
         };
 
-        Log("기본 날씨 데이터 설정됨");
+        Log("Set default weather data.");
         OnWeatherUpdated?.Invoke(CurrentWeather);
     }
 
@@ -271,14 +271,14 @@ public class WeatherData
     {
         return condition switch
         {
-            WeatherCondition.Clear => "☀️",
-            WeatherCondition.Clouds => "⛅",
-            WeatherCondition.Overcast => "☁️",
-            WeatherCondition.Rain => "🌧️",
-            WeatherCondition.Snow => "❄️",
-            WeatherCondition.Fog => "🌫️",
-            WeatherCondition.Storm => "⛈️",
-            _ => "🌤️"
+            WeatherCondition.Clear => "[Sun]",
+            WeatherCondition.Clouds => "[Cloud]",
+            WeatherCondition.Overcast => "[Overcast]",
+            WeatherCondition.Rain => "[Rain]",
+            WeatherCondition.Snow => "[Snow]",
+            WeatherCondition.Fog => "[Fog]",
+            WeatherCondition.Storm => "[Storm]",
+            _ => "[Weather]"
         };
     }
 }

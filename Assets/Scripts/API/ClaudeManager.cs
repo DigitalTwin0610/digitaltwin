@@ -35,7 +35,7 @@ public class ClaudeManager : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            LogError("분석할 텍스트가 없습니다.");
+            LogError("There are No Text.");
             return;
         }
 
@@ -75,14 +75,14 @@ public class ClaudeManager : MonoBehaviour
     private IEnumerator AnalyzeEmotionCoroutine(string text, string weatherInfo)
     {
         IsAnalyzing = true;
-        Log($"감정 분석 시작: {text}");
+        Log($"Start Emotion Analysis: {text}");
 
         // 프롬프트 구성
         string prompt = BuildPrompt(text, weatherInfo);
 
         // 요청 JSON 생성
         string requestJson = BuildRequestJson(prompt);
-        Log($"요청 JSON: {requestJson}");
+        Log($"Request JSON: {requestJson}");
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(requestJson);
 
@@ -98,25 +98,25 @@ public class ClaudeManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Log($"응답: {request.downloadHandler.text}");
+                Log($"Response: {request.downloadHandler.text}");
                 EmotionResult result = ParseResponse(request.downloadHandler.text);
                 
                 if (result != null)
                 {
                     LastResult = result;
-                    Log($"감정 분석 완료: {result.emotion} (H:{result.hue})");
+                    Log($"Finish Analysis: {result.emotion} (H:{result.hue})");
                     OnEmotionAnalyzed?.Invoke(result);
                 }
                 else
                 {
-                    LogError("응답 파싱 실패");
+                    LogError("Failed Parse Response");
                     SetDefaultResult(text);
                 }
             }
             else
             {
-                LogError($"API 오류: {request.error}");
-                LogError($"응답: {request.downloadHandler.text}");
+                LogError($"API error: {request.error}");
+                LogError($"Response: {request.downloadHandler.text}");
                 OnAnalysisError?.Invoke(request.error);
                 SetDefaultResult(text);
             }
@@ -127,31 +127,31 @@ public class ClaudeManager : MonoBehaviour
 
     private string BuildPrompt(string text, string weatherInfo)
     {
-        string weather = string.IsNullOrEmpty(weatherInfo) ? "정보 없음" : weatherInfo;
+        string weather = string.IsNullOrEmpty(weatherInfo) ? "No Info" : weatherInfo;
 
-        return $@"당신은 감정 분석 AI입니다.
-주어진 텍스트와 날씨 정보를 종합하여 현재 분위기를 분석하세요.
+        return $@"You are an emotion-analysis AI.
+Analyze the current mood by combining the given text and weather information.
 
-입력:
-- 텍스트: {text}
-- 날씨: {weather}
+Input:
+- Text: {text}
+- Weather: {weather}
 
-반드시 아래 JSON 형식으로만 응답하세요. 다른 설명 없이 JSON만 출력하세요.
+You must respond only in the JSON format below. Output JSON only, with no additional explanation.
 
 {{
   ""emotion"": ""joy|sadness|anger|calm|excited|fear|surprise"",
   ""hue"": 0-360,
-  ""summary"": ""20자 이내 한국어 요약""
+  ""summary"": ""Korean summary within 20 characters""
 }}
 
-emotion과 hue 매핑:
-- joy(기쁨): 50 (골드)
-- sadness(슬픔): 220 (블루)
-- anger(분노): 0 (레드)
-- calm(평온): 120 (그린)
-- excited(설렘): 30 (오렌지)
-- fear(두려움): 280 (퍼플)
-- surprise(놀람): 60 (밝은 노랑)";
+emotion–hue mapping:
+- joy: 50 (gold)
+- sadness: 220 (blue)
+- anger: 0 (red)
+- calm: 120 (green)
+- excited: 30 (orange)
+- fear: 280 (purple)
+- surprise: 60 (bright yellow)";
     }
 
     private string BuildRequestJson(string prompt)
@@ -185,7 +185,7 @@ emotion과 hue 매핑:
             int textIndex = json.IndexOf("\"text\":\"");
             if (textIndex < 0)
             {
-                LogError("text 필드를 찾을 수 없음");
+                LogError("Text Field Not Found");
                 return null;
             }
 
@@ -193,7 +193,7 @@ emotion과 hue 매핑:
             int endIndex = FindJsonStringEnd(json, startIndex);
             if (endIndex < 0)
             {
-                LogError("text 값 끝을 찾을 수 없음");
+                LogError("Text Field End Not Found");
                 return null;
             }
 
@@ -204,26 +204,26 @@ emotion과 hue 매핑:
                 .Replace("\\\"", "\"")
                 .Replace("\\\\", "\\");
 
-            Log($"Claude 응답 텍스트: {contentText}");
+            Log($"Claude Response Text: {contentText}");
 
             // JSON 부분만 추출
             int jsonStart = contentText.IndexOf('{');
             int jsonEnd = contentText.LastIndexOf('}');
             if (jsonStart < 0 || jsonEnd < 0)
             {
-                LogError("JSON 객체를 찾을 수 없음");
+                LogError("JSON Not Found in Content");
                 return null;
             }
 
             string emotionJson = contentText.Substring(jsonStart, jsonEnd - jsonStart + 1);
-            Log($"감정 JSON: {emotionJson}");
+            Log($"Emotion JSON: {emotionJson}");
 
             // 감정 결과 파싱
             return ParseEmotionJson(emotionJson);
         }
         catch (Exception e)
         {
-            LogError($"파싱 오류: {e.Message}");
+            LogError($"Parsing Error : {e.Message}");
             return null;
         }
     }
@@ -342,14 +342,14 @@ emotion과 hue 매핑:
     {
         return emotion switch
         {
-            EmotionType.Joy => "밝고 긍정적인 분위기",
-            EmotionType.Sadness => "차분하고 우울한 분위기",
-            EmotionType.Anger => "격앙되고 분노한 분위기",
-            EmotionType.Calm => "평온하고 안정된 분위기",
-            EmotionType.Excited => "들뜨고 설레는 분위기",
-            EmotionType.Fear => "불안하고 두려운 분위기",
-            EmotionType.Surprise => "놀랍고 신선한 분위기",
-            _ => "평온한 분위기"
+            EmotionType.Joy => "Bright and positive atmosphere",
+            EmotionType.Sadness => "Calm and gloomy atmosphere",
+            EmotionType.Anger => "Agitated and angry atmosphere",
+            EmotionType.Calm => "Peaceful and stable atmosphere",
+            EmotionType.Excited => "Lively and excited atmosphere",
+            EmotionType.Fear => "Anxious and fearful atmosphere",
+            EmotionType.Surprise => "Surprising and refreshing atmosphere",
+            _ => "Peaceful atmosphere"
         };
     }
 
@@ -359,7 +359,7 @@ emotion과 hue 매핑:
         {
             emotion = EmotionType.Calm,
             hue = 120,
-            summary = "기본 분석 결과",
+            summary = "Basic Analysis Result",
             timestamp = DateTime.Now
         };
         OnEmotionAnalyzed?.Invoke(LastResult);
@@ -400,14 +400,14 @@ public class EmotionResult
     {
         return emotion switch
         {
-            EmotionType.Joy => "😊",
-            EmotionType.Sadness => "😢",
-            EmotionType.Anger => "😠",
-            EmotionType.Calm => "😌",
-            EmotionType.Excited => "🤩",
-            EmotionType.Fear => "😨",
-            EmotionType.Surprise => "😲",
-            _ => "😐"
+            EmotionType.Joy => ":)",
+            EmotionType.Sadness => ":(",
+            EmotionType.Anger => ">:(",
+            EmotionType.Calm => "-_-",
+            EmotionType.Excited => ":D",
+            EmotionType.Fear => "D:",
+            EmotionType.Surprise => ":O",
+            _ => ":|"
         };
     }
 
@@ -415,14 +415,14 @@ public class EmotionResult
     {
         return emotion switch
         {
-            EmotionType.Joy => "기쁨",
-            EmotionType.Sadness => "슬픔",
-            EmotionType.Anger => "분노",
-            EmotionType.Calm => "평온",
-            EmotionType.Excited => "설렘",
-            EmotionType.Fear => "두려움",
-            EmotionType.Surprise => "놀람",
-            _ => "중립"
+            EmotionType.Joy => "Joy",
+            EmotionType.Sadness => "Sadness",
+            EmotionType.Anger => "Anger",
+            EmotionType.Calm => "Calm",
+            EmotionType.Excited => "Excitement",
+            EmotionType.Fear => "Fear",
+            EmotionType.Surprise => "Surprise",
+            _ => "Neutral"
         };
     }
 }

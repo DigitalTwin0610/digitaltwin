@@ -93,7 +93,7 @@ public class HSVController : MonoBehaviour
     public void SetHue(float h)
     {
         _targetHue = Mathf.Clamp(h, 0f, 360f);
-        Log($"Hue 설정: {_targetHue}° (감정)");
+        Log($"Hue setting: {_targetHue} (Emotion)");
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class HSVController : MonoBehaviour
     public void SetSaturation(float s)
     {
         _targetSaturation = Mathf.Clamp(s, 0f, 100f);
-        Log($"Saturation 설정: {_targetSaturation}% (날씨)");
+        Log($"Saturation setting: {_targetSaturation}% (Weather)");
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ public class HSVController : MonoBehaviour
     public void SetBrightness(float v)
     {
         _targetBrightness = Mathf.Clamp(v, 0f, 100f);
-        Log($"Brightness 설정: {_targetBrightness}% (조도)");
+        Log($"Brightness setting: {_targetBrightness}% (Light)");
     }
 
     /// <summary>
@@ -182,7 +182,7 @@ public class HSVController : MonoBehaviour
     public void SetManualMode(bool enabled)
     {
         manualMode = enabled;
-        Log($"수동 모드: {(enabled ? "ON" : "OFF")}");
+        Log($"Customize Mode: {(enabled ? "ON" : "OFF")}");
         NotifyColorChanged();
     }
 
@@ -196,7 +196,7 @@ public class HSVController : MonoBehaviour
         {
             NotifyColorChanged();
         }
-        Log($"수동 색상: {ColorUtility.ToHtmlStringRGB(color)}");
+        Log($"Costomize Color: {ColorUtility.ToHtmlStringRGB(color)}");
     }
 
     /// <summary>

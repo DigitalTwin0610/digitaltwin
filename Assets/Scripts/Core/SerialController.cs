@@ -72,7 +72,7 @@ public class SerialController : MonoBehaviour
     {
         if (IsConnected)
         {
-            Log("이미 연결됨");
+            Log("Already connected");
             return true;
         }
 
@@ -93,13 +93,13 @@ public class SerialController : MonoBehaviour
             _readThread = new Thread(ReadThread);
             _readThread.Start();
 
-            Log($"연결 성공: {portName}");
+            Log($"Success Connection: {portName}");
             OnConnected?.Invoke();
             return true;
         }
         catch (Exception e)
         {
-            LogError($"연결 실패: {e.Message}");
+            LogError($"Failed Connection: {e.Message}");
             return false;
         }
     }
@@ -121,11 +121,11 @@ public class SerialController : MonoBehaviour
             try
             {
                 _serialPort.Close();
-                Log("연결 해제됨");
+                Log("Disconnected");
             }
             catch (Exception e)
             {
-                LogError($"연결 해제 오류: {e.Message}");
+                LogError($"Disconnected Error: {e.Message}");
             }
         }
 
@@ -194,7 +194,7 @@ public class SerialController : MonoBehaviour
     {
         if (!IsConnected)
         {
-            LogError("연결되지 않음 - 명령 전송 실패");
+            LogError("Cannot send command, not connected");
             return;
         }
 
@@ -204,11 +204,11 @@ public class SerialController : MonoBehaviour
             {
                 _serialPort.Write(command);
             }
-            Log($"전송: {command.Trim()}");
+            Log($"Send: {command.Trim()}");
         }
         catch (Exception e)
         {
-            LogError($"전송 오류: {e.Message}");
+            LogError($"Sending Error: {e.Message}");
         }
     }
 
@@ -241,7 +241,7 @@ public class SerialController : MonoBehaviour
             {
                 if (_isRunning)
                 {
-                    Debug.LogWarning($"[SerialController] 읽기 오류: {e.Message}");
+                    Debug.LogWarning($"[SerialController] Reading Error: {e.Message}");
                 }
             }
 
@@ -270,7 +270,7 @@ public class SerialController : MonoBehaviour
 
     private void ParseData(string data)
     {
-        Log($"수신: {data}");
+        Log($"Recieve: {data}");
 
         // 형식: LIGHT:72
         if (data.StartsWith("LIGHT:"))
@@ -281,13 +281,13 @@ public class SerialController : MonoBehaviour
                 brightness = Mathf.Clamp(brightness, 0, 100);
                 LastBrightness = brightness;
                 OnBrightnessReceived?.Invoke(brightness);
-                Log($"조도값 파싱: {brightness}%");
+                Log($"Light value parsing: {brightness}%");
             }
         }
         // 형식: STATUS:OK
         else if (data.StartsWith("STATUS:"))
         {
-            Log($"Arduino 상태: {data.Substring(7)}");
+            Log($"Arduino Status: {data.Substring(7)}");
         }
     }
 

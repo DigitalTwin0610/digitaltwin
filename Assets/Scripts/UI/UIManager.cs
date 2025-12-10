@@ -20,7 +20,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private SerialController serialController;
 
     [Header("=== Status Bar UI ===")]
-    [SerializeField] private TMP_Text weatherText;       // 🌤️ 맑음 8°C
+    [SerializeField] private TMP_Text weatherText;       // 🌤️ 맑음 8C
     [SerializeField] private TMP_Text emotionText;       // 😊 기쁨
     [SerializeField] private TMP_Text summaryText;       // AI 요약 메시지
 
@@ -195,7 +195,7 @@ public class UIManager : MonoBehaviour
         // 기본 메시지로 분석
         if (!_isAnalyzing && weatherManager != null && weatherManager.CurrentWeather != null)
         {
-            AnalyzeWithText("오늘 하루 시작");
+            AnalyzeWithText("Start today");
         }
     }
 
@@ -220,7 +220,7 @@ public class UIManager : MonoBehaviour
         if (autoModeToggle != null) autoModeToggle.isOn = true;
         if (manualModeToggle != null) manualModeToggle.isOn = false;
 
-        Log("AUTO 모드 활성화");
+        Log("Active AUTO Mode");
         SaveCurrentState();
     }
 
@@ -249,7 +249,7 @@ public class UIManager : MonoBehaviour
             if (brightnessSlider != null) brightnessSlider.value = hsvController.Brightness;
         }
 
-        Log("MANUAL 모드 활성화");
+        Log("Active MANUAL Mode");
         SaveCurrentState();
     }
 
@@ -288,7 +288,7 @@ public class UIManager : MonoBehaviour
         
         if (string.IsNullOrEmpty(text))
         {
-            text = "현재 기분";  // 기본값
+            text = "Present emotion";  // 기본값
         }
 
         AnalyzeWithText(text);
@@ -301,7 +301,7 @@ public class UIManager : MonoBehaviour
         _isAnalyzing = true;
         UpdateAnalyzeButton(true);
 
-        Log($"분석 시작: {text}");
+        Log($"Start Analysis: {text}");
 
         // Claude가 다국어를 직접 이해하므로 바로 분석
         PerformAnalysis(text);
@@ -311,7 +311,7 @@ public class UIManager : MonoBehaviour
     {
         if (claudeManager == null)
         {
-            LogError("ClaudeManager가 없습니다.");
+            LogError("There is no ClaudeManager.");
             _isAnalyzing = false;
             UpdateAnalyzeButton(false);
             return;
@@ -322,7 +322,7 @@ public class UIManager : MonoBehaviour
         if (weatherManager != null && weatherManager.CurrentWeather != null)
         {
             var w = weatherManager.CurrentWeather;
-            weatherInfo = $"{w.description}, {w.temperature}°C";
+            weatherInfo = $"{w.description}, {w.temperature}C";
         }
 
         claudeManager.AnalyzeEmotion(text, weatherInfo);
@@ -334,12 +334,12 @@ public class UIManager : MonoBehaviour
 
     private void OnWeatherUpdated(WeatherData data)
     {
-        Log($"날씨 업데이트: {data.GetIcon()} {data.description} {data.temperature}°C");
+        Log($"Weather Update: {data.GetIcon()} {data.description} {data.temperature}C");
 
         // UI 업데이트
         if (weatherText != null)
         {
-            weatherText.text = $"{data.GetIcon()} {data.description} {data.temperature}°C";
+            weatherText.text = $"{data.GetIcon()} {data.conditionText} {data.temperature}C";
         }
 
         // HSV 채도 업데이트 (AUTO 모드일 때만)
@@ -353,7 +353,7 @@ public class UIManager : MonoBehaviour
 
     private void OnEmotionAnalyzed(EmotionResult result)
     {
-        Log($"감정 분석 완료: {result.GetEmoji()} {result.GetEmotionKorean()} (H:{result.hue})");
+        Log($"Finish Analysis Emotion: {result.GetEmoji()} {result.GetEmotionKorean()} (H:{result.hue})");
 
         _isAnalyzing = false;
         UpdateAnalyzeButton(false);
@@ -366,7 +366,7 @@ public class UIManager : MonoBehaviour
 
         if (summaryText != null)
         {
-            summaryText.text = $"💬 \"{result.summary}\"";
+            summaryText.text = $"{result.summary}";
         }
 
         // HSV 색감 업데이트 (AUTO 모드일 때만)
@@ -386,20 +386,20 @@ public class UIManager : MonoBehaviour
 
     private void OnAnalysisError(string error)
     {
-        LogError($"분석 오류: {error}");
+        LogError($"Analysis Error: {error}");
 
         _isAnalyzing = false;
         UpdateAnalyzeButton(false);
 
         if (summaryText != null)
         {
-            summaryText.text = "💬 분석 중 오류가 발생했습니다.";
+            summaryText.text = "error occurred during analysis.";
         }
     }
 
     private void OnBrightnessReceived(int brightness)
     {
-        Log($"조도 수신: {brightness}%");
+        Log($"Recieved Light: {brightness}%");
 
         // HSV 명도 업데이트
         if (hsvController != null)
@@ -412,7 +412,7 @@ public class UIManager : MonoBehaviour
 
     private void OnRemoteStateChanged(LampState state)
     {
-        Log($"원격 상태 변경: mode={state.mode}");
+        Log($"Change Remote Status: mode={state.mode}");
 
         // 모드 동기화
         if (state.mode == "MANUAL" && !_isManualMode)
@@ -441,13 +441,13 @@ public class UIManager : MonoBehaviour
 
     private void OnSerialConnected()
     {
-        Log("Serial 연결됨");
+        Log("Serial Connected");
         UpdateConnectionStatus();
     }
 
     private void OnSerialDisconnected()
     {
-        Log("Serial 연결 해제됨");
+        Log("Serial Disconnected");
         UpdateConnectionStatus();
     }
 
@@ -464,7 +464,7 @@ public class UIManager : MonoBehaviour
 
         if (analyzeButtonText != null)
         {
-            analyzeButtonText.text = analyzing ? "분석 중..." : "분석 ▶";
+            analyzeButtonText.text = analyzing ? "Analysis..." : "Analysis";
         }
     }
 
@@ -486,7 +486,7 @@ public class UIManager : MonoBehaviour
         if (connectionText != null)
         {
             string status = "";
-            status += serialConnected ? "● Serial " : "○ Serial ";
+            status += serialConnected ? "● Serial        " : "○ Serial        ";
             status += firebaseConnected ? "● Firebase" : "○ Firebase";
             connectionText.text = status;
         }

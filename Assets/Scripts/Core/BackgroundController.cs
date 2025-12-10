@@ -86,7 +86,7 @@ public class BackgroundController : MonoBehaviour
     {
         currentBrightness = Mathf.Clamp(brightness, 0, 100);
         _targetBrightness = currentBrightness / 100f;
-        Log($"밝기 설정: {currentBrightness}%");
+        Log($"Brightness setting: {currentBrightness}%");
     }
 
     /// <summary>

@@ -92,7 +92,7 @@ public class FirebaseManager : MonoBehaviour
             StopCoroutine(_listenerCoroutine);
         }
         _listenerCoroutine = StartCoroutine(ListenForChangesCoroutine());
-        Log("리스닝 시작");
+        Log("Start Listening");
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class FirebaseManager : MonoBehaviour
             StopCoroutine(_listenerCoroutine);
             _listenerCoroutine = null;
         }
-        Log("리스닝 중지");
+        Log("Stop Listening");
     }
 
     #endregion
@@ -117,7 +117,7 @@ public class FirebaseManager : MonoBehaviour
         string url = $"{databaseUrl}/emolamp/state.json";
         string json = StateToJson(state);
 
-        Log($"저장 요청: {json}");
+        Log($"Request Save: {json}");
 
         using (UnityWebRequest request = new UnityWebRequest(url, "PUT"))
         {
@@ -130,13 +130,13 @@ public class FirebaseManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Log("상태 저장 완료");
+                Log("Finish Save");
                 _lastSyncedState = state.Clone();
                 IsConnected = true;
             }
             else
             {
-                LogError($"저장 실패: {request.error}");
+                LogError($"Failed Save: {request.error}");
                 OnSyncError?.Invoke(request.error);
                 IsConnected = false;
             }
@@ -159,11 +159,11 @@ public class FirebaseManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Log($"필드 업데이트 완료: {field} = {value}");
+                Log($"Field Update Success: {field} = {value}");
             }
             else
             {
-                LogError($"필드 업데이트 실패: {request.error}");
+                LogError($"Field Update Failed: {request.error}");
             }
         }
     }
@@ -179,7 +179,7 @@ public class FirebaseManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
-                Log($"로드 응답: {json}");
+                Log($"Load Response: {json}");
 
                 if (json != "null" && !string.IsNullOrEmpty(json))
                 {
@@ -190,13 +190,13 @@ public class FirebaseManager : MonoBehaviour
                 }
                 else
                 {
-                    Log("저장된 상태 없음");
+                    Log("No Saved State Found");
                     callback?.Invoke(new LampState());
                 }
             }
             else
             {
-                LogError($"로드 실패: {request.error}");
+                LogError($"Failed Load: {request.error}");
                 OnSyncError?.Invoke(request.error);
                 callback?.Invoke(null);
                 IsConnected = false;
@@ -227,7 +227,7 @@ public class FirebaseManager : MonoBehaviour
                         // 원격에서 변경된 경우에만 이벤트 발생
                         if (HasRemoteChanges(remoteState))
                         {
-                            Log("원격 변경 감지!");
+                            Log("Remote State Changed!");
                             CurrentState = remoteState;
                             _lastSyncedState = remoteState.Clone();
                             OnRemoteStateChanged?.Invoke(remoteState);
@@ -311,7 +311,7 @@ public class FirebaseManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            LogError($"JSON 파싱 오류: {e.Message}");
+            LogError($"JSON Parsing Error: {e.Message}");
         }
 
         return state;

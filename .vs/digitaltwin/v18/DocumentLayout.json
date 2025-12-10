@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\ybang\\digitaltwin\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\API\\WeatherManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\API\\WeatherManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\SerialController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\SerialController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -17,20 +21,27 @@
           "SelectedChildIndex": 1,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "SerialController.cs",
               "DocumentMoniker": "C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\SerialController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\SerialController.cs",
               "ToolTip": "C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\SerialController.cs",
               "RelativeToolTip": "Assets\\Scripts\\SerialController.cs",
-              "ViewState": "AgIAANIAAAAAAAAAAAAUwOoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-06T15:55:51.533Z",
+              "WhenOpened": "2025-12-06T15:55:51.533Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "WeatherManager.cs",
+              "DocumentMoniker": "C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\API\\WeatherManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\API\\WeatherManager.cs",
+              "ToolTip": "C:\\Users\\ybang\\digitaltwin\\Assets\\Scripts\\API\\WeatherManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\API\\WeatherManager.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T06:21:16.887Z",
               "EditorCaption": ""
             }
           ]
