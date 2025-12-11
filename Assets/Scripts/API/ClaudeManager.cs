@@ -11,8 +11,8 @@ using System.Text;
 public class ClaudeManager : MonoBehaviour
 {
     [Header("API Settings")]
-    [SerializeField] private string apiKey = "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";
-    [SerializeField] private string model = "claude-opus-4-5-20251101";
+    [SerializeField] private string apiKey = "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";
+    [SerializeField] private string model = "claude-sonnet-4-20250514";
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
