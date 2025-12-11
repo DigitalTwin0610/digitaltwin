@@ -119,7 +119,6 @@ public class UIManager : MonoBehaviour
         // MQTT - Cloudtype 브라이트니스 수신
         if (mqttManager != null)
         {
-            mqttManager.OnMessageReceived += OnMqttMessageReceived;
             mqttManager.OnConnected += OnMqttConnected;        // ← 추가
             mqttManager.OnDisconnected += OnMqttDisconnected;  // ← 추가
         }
@@ -190,7 +189,6 @@ public class UIManager : MonoBehaviour
             firebaseManager.OnRemoteStateChanged -= OnRemoteStateChanged;
             firebaseManager.OnConnectionChanged -= OnFirebaseConnectionChanged;  // ← 추가
         }
-        if (mqttManager != null) mqttManager.OnMessageReceived -= OnMqttMessageReceived;
         if (serialController != null)
         {
             serialController.OnConnected -= OnSerialConnected;
@@ -264,25 +262,38 @@ public class UIManager : MonoBehaviour
         Log("Active MANUAL Mode");
         SaveCurrentState();
     }
-
+    
     private void OnManualColorChanged(float _)
-    {
-        if (!_isManualMode) return;
+    {
+        if (!_isManualMode) return;
 
-        float h = hueSlider != null ? hueSlider.value : 120;
-        float s = saturationSlider != null ? saturationSlider.value : 70;
-        float v = brightnessSlider != null ? brightnessSlider.value : 70;
+        float h = hueSlider != null ? hueSlider.value : 120;
+        float s = saturationSlider != null ? saturationSlider.value : 70;
+        float v = brightnessSlider != null ? brightnessSlider.value : 70;
 
-        Color color = Color.HSVToRGB(h / 360f, s / 100f, v / 100f);
+        Color color = Color.HSVToRGB(h / 360f, s / 100f, v / 100f);
+        string colorHex = ColorUtility.ToHtmlStringRGB(color); // 💡 Hex값 추출 추가
 
-        if (hsvController != null)
+        if (hsvController != null)
+        {
+            hsvController.SetManualColor(color);
+        }
+
+        if (colorPreview != null)
+        {
+            colorPreview.color = color;
+        }
+        
+        // ★★★ 여기에 요청하신 LogManualState 호출 로직을 추가합니다 ★★★
+        if (mqttManager != null)
         {
-            hsvController.SetManualColor(color);
-        }
-
-        if (colorPreview != null)
-        {
-            colorPreview.color = color;
+            // ColorUtility.ToHtmlStringRGB를 통해 얻은 Hex 값은 #이 빠져있으므로, #을 붙여줍니다.
+            mqttManager.LogManualState(
+                Mathf.RoundToInt(h), 
+                Mathf.RoundToInt(s), 
+                Mathf.RoundToInt(v), 
+                "#" + colorHex // Hex 값 전송
+            );
         }
 
         SaveCurrentState();
@@ -408,48 +419,6 @@ public class UIManager : MonoBehaviour
         if (summaryText != null)
         {
             summaryText.text = "error occurred during analysis.";
-        }
-    }
-
-    private void OnMqttMessageReceived(string topic, string payload)
-    {
-        Log($"MQTT Recieve: [{topic}] {payload}");
-
-        // brightness 토픽 처리
-        if (topic.Contains("brightness") || topic.Contains("state"))
-        {
-            // payload에서 brightness 값 추출
-            int brightnessIndex = payload.IndexOf("\"brightness\"");
-            if (brightnessIndex >= 0)
-            {
-                int colonIndex = payload.IndexOf(':', brightnessIndex);
-                string numStr = "";
-                for (int i = colonIndex + 1; i < payload.Length; i++)
-                {
-                    char c = payload[i];
-                    if (char.IsDigit(c))
-                    {
-                        numStr += c;
-                    }
-                    else if (numStr.Length > 0)
-                    {
-                        break;
-                    }
-                }
-
-                if (int.TryParse(numStr, out int brightness))
-                {
-                    Log($"Cloudtype Brightness Recieve: {brightness}%");
-                    
-                    // HSV 명도 업데이트 (그라데이션은 HSVController에서 자동 처리)
-                    if (hsvController != null)
-                    {
-                        hsvController.SetBrightnessFromLight(brightness);
-                    }
-
-                    SaveCurrentState();
-                }
-            }
         }
     }
 
@@ -587,12 +556,6 @@ public class UIManager : MonoBehaviour
         }
 
         firebaseManager.SaveState(state);
-
-        // MQTT도 발행
-        if (mqttManager != null && mqttManager.IsConnected)
-        {
-            mqttManager.PublishLampState(state);
-        }
     }
 
     #endregion

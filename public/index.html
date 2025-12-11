@@ -6,13 +6,14 @@
     <title>EmoLamp Dashboard</title>
     <style>
         :root {
-            --bg-primary: #0f0f1a;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #16213e;
-            --text-primary: #eee;
-            --text-secondary: #aaa;
-            --accent: #4fc3dc;
-            --border: rgba(255,255,255,0.1);
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -23,7 +24,7 @@
 
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
+            background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
@@ -31,26 +32,28 @@
 
         /* Header */
         .header {
-            background: var(--bg-secondary);
-            padding: 1rem 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
         .header h1 {
             font-size: 1.5rem;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: var(--text-primary);
         }
 
-        .status-badge {
+        .header h1 span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-indicator {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -62,167 +65,226 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #4caf50;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            background: #48bb78;
         }
 
         /* Main Container */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 1.5rem;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            grid-template-rows: auto auto 1fr;
-            gap: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
         /* Cards */
         .card {
-            background: var(--bg-card);
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
-            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
         }
 
         .card-title {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
         /* Current State Card */
-        .current-state {
-            grid-row: span 2;
-            text-align: center;
-        }
-
-        .lamp-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin: 1rem auto;
-            background: #50C878;
-            box-shadow: 0 0 60px rgba(80, 200, 120, 0.5);
-            transition: all 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lamp-emoji {
-            font-size: 4rem;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
-        }
-
-        .emotion-label {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 1rem 0 0.5rem;
-        }
-
-        .color-hex {
-            font-family: monospace;
-            font-size: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .state-details {
-            margin-top: 1.5rem;
-            text-align: left;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        .state-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .state-row:last-child {
-            border-bottom: none;
-        }
-
-        .state-label {
-            color: var(--text-secondary);
-        }
-
-        .state-value {
-            font-weight: 500;
-        }
-
-        /* Timeline Card */
-        .timeline-card {
-            grid-column: 2;
-        }
-
-        .timeline-container {
-            display: flex;
-            gap: 4px;
-            overflow-x: auto;
-            padding: 1rem 0;
-        }
-
-        .timeline-hour {
-            flex: 1;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .timeline-bar {
-            height: 60px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-        }
-
-        .timeline-bar.active {
-            background: var(--accent);
-        }
-
-        .timeline-bar.has-data {
-            box-shadow: 0 0 10px rgba(79, 195, 220, 0.3);
-        }
-
-        .timeline-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Distribution Card */
-        .distribution-card {
-            grid-column: 2;
-        }
-
-        .chart-container {
+        .current-state-card {
             display: flex;
             align-items: center;
             gap: 2rem;
+            padding: 2rem;
         }
 
-        .donut-chart {
+        .lamp-visual {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 120px;
+            height: 120px;
             flex-shrink: 0;
         }
 
-        .donut-chart svg {
+        .lamp-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .lamp-emoji {
+            font-size: 3rem;
+        }
+
+        .state-info {
+            flex: 1;
+        }
+
+        .state-mode {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .state-label {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .state-details {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .state-detail-item {
+            text-align: center;
+        }
+
+        .state-detail-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .state-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .auto-mode-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .auto-mode-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .auto-mode-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Area Chart */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .chart-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Distribution Section */
+        .distribution-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .donut-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .donut-svg {
             width: 100%;
             height: 100%;
             transform: rotate(-90deg);
@@ -230,7 +292,7 @@
 
         .donut-segment {
             fill: none;
-            stroke-width: 30;
+            stroke-width: 25;
             transition: all 0.5s ease;
         }
 
@@ -242,191 +304,157 @@
             text-align: center;
         }
 
-        .donut-total {
-            font-size: 2rem;
+        .donut-value {
+            font-size: 2.5rem;
             font-weight: 700;
+            color: var(--text-primary);
         }
 
         .donut-label {
             font-size: 0.75rem;
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
 
-        .legend {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        .emotion-bars {
+            display: flex;
+            flex-direction: column;
             gap: 0.75rem;
         }
 
-        .legend-item {
+        .emotion-bar-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-
-        .legend-text {
-            flex: 1;
-        }
-
-        .legend-emotion {
-            font-size: 0.875rem;
-        }
-
-        .legend-percent {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Recent Logs Card */
-        .recent-card {
-            grid-column: 1;
-        }
-
-        .log-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .log-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            background: rgba(0,0,0,0.2);
-            transition: background 0.2s;
-        }
-
-        .log-item:hover {
-            background: rgba(0,0,0,0.3);
-        }
-
-        .log-emoji {
-            font-size: 1.5rem;
-        }
-
-        .log-color {
-            width: 8px;
-            height: 40px;
-            border-radius: 4px;
-        }
-
-        .log-content {
-            flex: 1;
-        }
-
-        .log-emotion {
-            font-weight: 500;
-        }
-
-        .log-time {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Summary Card */
-        .summary-card {
-            grid-column: 2;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
         }
 
-        .summary-item {
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .summary-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .summary-label {
-            font-size: 0.75rem;
+        .emotion-bar-label {
+            width: 80px;
+            font-size: 0.875rem;
             color: var(--text-secondary);
-            margin-top: 0.25rem;
+        }
+
+        .emotion-bar-track {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .emotion-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .emotion-bar-value {
+            width: 50px;
+            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Recent List */
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        .recent-item:hover {
+            transform: translateX(4px);
+        }
+
+        .recent-color {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+        }
+
+        .recent-emoji {
+            font-size: 1.5rem;
+        }
+
+        .recent-content {
+            flex: 1;
+        }
+
+        .recent-emotion {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .recent-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
         }
 
         /* Responsive */
         @media (max-width: 900px) {
-            .container {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .two-column {
                 grid-template-columns: 1fr;
             }
 
-            .current-state {
-                grid-row: auto;
+            .distribution-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
             }
 
-            .timeline-card,
-            .distribution-card,
-            .summary-card {
-                grid-column: 1;
-            }
-
-            .chart-container {
+            .current-state-card {
                 flex-direction: column;
+                text-align: center;
             }
 
-            .donut-chart {
-                width: 150px;
-                height: 150px;
+            .state-details {
+                justify-content: center;
             }
         }
 
         @media (max-width: 500px) {
-            .header {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 1.2rem;
-            }
-
             .container {
                 padding: 1rem;
-                gap: 1rem;
             }
 
-            .card {
-                padding: 1rem;
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
 
-            .lamp-preview {
-                width: 120px;
-                height: 120px;
-            }
-
-            .lamp-emoji {
-                font-size: 3rem;
+            .chart-container {
+                height: 200px;
             }
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
-            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
@@ -434,173 +462,160 @@
             border-radius: 3px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
         }
 
-        /* Loading State */
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>🌈 EmoLamp Dashboard</h1>
-        <div class="status-badge">
+        <h1>🌈 <span>EmoLamp</span> Dashboard</h1>
+        <div class="status-indicator">
             <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">연결됨</span>
+            <span id="statusText">Connected</span>
         </div>
     </header>
 
     <main class="container">
-        <!-- 현재 상태 -->
-        <section class="card current-state">
-            <div class="card-title">현재 상태</div>
-            <div class="lamp-preview" id="lampPreview">
-                <span class="lamp-emoji" id="currentEmoji">😌</span>
+        <!-- Current State -->
+        <div class="card" id="currentStateCard">
+            <div id="currentStateContent">
+                <!-- JS로 동적 생성 -->
             </div>
-            <div class="emotion-label" id="currentEmotion">평온</div>
-            <div class="color-hex" id="currentHex">#50C878</div>
-            
-            <div class="state-details">
-                <div class="state-row">
-                    <span class="state-label">모드</span>
-                    <span class="state-value" id="currentMode">AUTO</span>
-                </div>
-                <div class="state-row">
-                    <span class="state-label">Hue</span>
-                    <span class="state-value" id="currentHue">120°</span>
-                </div>
-                <div class="state-row">
-                    <span class="state-label">채도</span>
-                    <span class="state-value" id="currentSat">70%</span>
-                </div>
-                <div class="state-row">
-                    <span class="state-label">명도</span>
-                    <span class="state-value" id="currentBright">70%</span>
-                </div>
-                <div class="state-row">
-                    <span class="state-label">날씨</span>
-                    <span class="state-value" id="currentWeather">-</span>
-                </div>
-            </div>
-        </section>
+        </div>
 
-        <!-- 타임라인 -->
-        <section class="card timeline-card">
-            <div class="card-title">오늘의 감정 타임라인</div>
-            <div class="timeline-container" id="timeline">
+        <!-- Stats Summary -->
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Analyses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statToday">0</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statTopEmotion">😌</div>
+                <div class="stat-label">Top Emotion</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statAvgHue">0°</div>
+                <div class="stat-label">Avg Hue</div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Emotion Timeline</div>
+                    <div class="card-subtitle">Today's emotion changes</div>
+                </div>
+            </div>
+            <div class="chart-legend" id="chartLegend">
                 <!-- JS로 생성 -->
             </div>
-        </section>
-
-        <!-- 감정 분포 -->
-        <section class="card distribution-card">
-            <div class="card-title">감정 분포</div>
             <div class="chart-container">
-                <div class="donut-chart">
-                    <svg viewBox="0 0 100 100" id="donutChart">
+                <svg class="chart-svg" id="areaChart" viewBox="0 0 800 250" preserveAspectRatio="none">
+                    <!-- JS로 생성 -->
+                </svg>
+            </div>
+            <div class="chart-labels" id="chartLabels">
+                <!-- JS로 생성 -->
+            </div>
+        </div>
+
+        <!-- Two Column: Distribution & Recent -->
+        <div class="two-column">
+            <!-- Emotion Distribution -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Emotion Distribution</div>
+                </div>
+                <div class="distribution-grid">
+                    <div class="donut-container">
+                        <svg class="donut-svg" viewBox="0 0 100 100" id="donutChart">
+                            <!-- JS로 생성 -->
+                        </svg>
+                        <div class="donut-center">
+                            <div class="donut-value" id="donutTotal">0</div>
+                            <div class="donut-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="emotion-bars" id="emotionBars">
                         <!-- JS로 생성 -->
-                    </svg>
-                    <div class="donut-center">
-                        <div class="donut-total" id="totalCount">0</div>
-                        <div class="donut-label">총 분석</div>
                     </div>
                 </div>
-                <div class="legend" id="legend">
+            </div>
+
+            <!-- Recent Logs -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Activity</div>
+                </div>
+                <div class="recent-list" id="recentList">
                     <!-- JS로 생성 -->
                 </div>
             </div>
-        </section>
-
-        <!-- 최근 기록 -->
-        <section class="card recent-card">
-            <div class="card-title">최근 기록</div>
-            <div class="log-list" id="recentLogs">
-                <!-- JS로 생성 -->
-            </div>
-        </section>
-
-        <!-- 누적 통계 -->
-        <section class="card summary-card">
-            <div class="card-title">누적 통계</div>
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="summary-value" id="summaryTotal">0</div>
-                    <div class="summary-label">총 분석 횟수</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="summaryToday">0</div>
-                    <div class="summary-label">오늘 분석</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="summaryTopEmotion">😌</div>
-                    <div class="summary-label">최다 감정</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="summaryAvgHue">120°</div>
-                    <div class="summary-label">평균 Hue</div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
     <script>
-        // 감정별 색상
+        // 감정별 색상 (파스텔톤)
         const emotionColors = {
-            joy: '#FFD700',
-            sadness: '#4169E1',
-            anger: '#DC143C',
-            calm: '#50C878',
-            excited: '#FF8C00',
-            fear: '#9932CC',
-            surprise: '#FFFF00'
+            joy: '#FFD93D',
+            sadness: '#6C9BCF',
+            anger: '#FF6B6B',
+            calm: '#6BCB77',
+            excited: '#FF8C42',
+            fear: '#9D65C9',
+            surprise: '#F9F871'
         };
 
-        // API 기본 URL
-        const API_BASE = '';
+        const emotionLabels = {
+            joy: 'Joy',
+            sadness: 'Sadness',
+            anger: 'Anger',
+            calm: 'Calm',
+            excited: 'Excited',
+            fear: 'Fear',
+            surprise: 'Surprise'
+        };
 
-        // 데이터 저장
-        let currentData = {};
-        let timelineData = [];
-        let distributionData = [];
-        let recentData = [];
+        const emotionEmojis = {
+            joy: '😊',
+            sadness: '😢',
+            anger: '😡',
+            calm: '😌',
+            excited: '🤩',
+            fear: '😨',
+            surprise: '😲'
+        };
+
+        const API_BASE = '';
 
         // 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            initTimeline();
             fetchAllData();
-            // 5초마다 업데이트
             setInterval(fetchAllData, 5000);
         });
 
-        // 타임라인 초기화
-        function initTimeline() {
-            const container = document.getElementById('timeline');
-            container.innerHTML = '';
-            
-            for (let i = 0; i < 24; i++) {
-                const hour = document.createElement('div');
-                hour.className = 'timeline-hour';
-                hour.innerHTML = `
-                    <div class="timeline-bar" id="hour-${i}"></div>
-                    <div class="timeline-label">${i.toString().padStart(2, '0')}</div>
-                `;
-                container.appendChild(hour);
-            }
-        }
-
-        // 모든 데이터 가져오기
         async function fetchAllData() {
             try {
                 await Promise.all([
                     fetchCurrent(),
+                    fetchSummary(),
                     fetchTimeline(),
                     fetchDistribution(),
-                    fetchRecent(),
-                    fetchSummary()
+                    fetchRecent()
                 ]);
                 updateStatus(true);
             } catch (error) {
@@ -613,174 +628,258 @@
         async function fetchCurrent() {
             const res = await fetch(`${API_BASE}/api/stats/current`);
             const data = await res.json();
-            currentData = data;
-            updateCurrentUI(data);
+            updateCurrentState(data);
         }
 
-        // 타임라인
+        function updateCurrentState(data) {
+            const container = document.getElementById('currentStateContent');
+            
+            if (data.mode === 'AUTO' || !data.mode) {
+                // Auto Mode - 간단히 표시
+                container.innerHTML = `
+                    <div class="auto-mode-display">
+                        <div>
+                            <div class="auto-mode-icon">🤖</div>
+                            <div class="auto-mode-text">Auto Mode</div>
+                            <div class="card-subtitle" style="margin-top: 0.5rem;">
+                                Emotion-based automatic color control
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Manual Mode - 상세 표시
+                const color = data.colorHex || '#667eea';
+                container.innerHTML = `
+                    <div class="current-state-card">
+                        <div class="lamp-visual">
+                            <div class="lamp-circle" style="background: ${color}; box-shadow: 0 0 40px ${color}80;">
+                                <span class="lamp-emoji">${data.emotionEmoji || '🎨'}</span>
+                            </div>
+                        </div>
+                        <div class="state-info">
+                            <div class="state-mode">Manual Mode</div>
+                            <div class="state-label">${data.emotionKorean || 'Custom Color'}</div>
+                            <div class="card-subtitle">${color}</div>
+                            <div class="state-details">
+                                <div class="state-detail-item">
+                                    <div class="state-detail-value">${data.hue || 0}°</div>
+                                    <div class="state-detail-label">Hue</div>
+                                </div>
+                                <div class="state-detail-item">
+                                    <div class="state-detail-value">${data.saturation || 0}%</div>
+                                    <div class="state-detail-label">Saturation</div>
+                                </div>
+                                <div class="state-detail-item">
+                                    <div class="state-detail-value">${data.brightness || 0}%</div>
+                                    <div class="state-detail-label">Brightness</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 통계 요약
+        async function fetchSummary() {
+            const res = await fetch(`${API_BASE}/api/stats/summary`);
+            const data = await res.json();
+            
+            document.getElementById('statTotal').textContent = data.totalAnalyses;
+            document.getElementById('statToday').textContent = data.todayAnalyses;
+            document.getElementById('statTopEmotion').textContent = 
+                `${data.topEmotionEmoji || '😌'}`;
+            document.getElementById('statAvgHue').textContent = `${data.averageHue}°`;
+        }
+
+        // 타임라인 (Area Chart)
         async function fetchTimeline() {
             const res = await fetch(`${API_BASE}/api/stats/timeline`);
             const data = await res.json();
-            timelineData = data.timeline;
-            updateTimelineUI(data.timeline);
+            drawAreaChart(data.timeline);
+        }
+
+        function drawAreaChart(timeline) {
+            const svg = document.getElementById('areaChart');
+            const legendContainer = document.getElementById('chartLegend');
+            const labelsContainer = document.getElementById('chartLabels');
+            
+            // 시간대별 감정 집계
+            const emotionsByHour = {};
+            const activeEmotions = new Set();
+            
+            timeline.forEach(item => {
+                if (item.emotion && item.count > 0) {
+                    activeEmotions.add(item.emotion);
+                    emotionsByHour[item.hour] = {
+                        emotion: item.emotion,
+                        count: item.count
+                    };
+                }
+            });
+
+            // 범례 생성
+            const emotionList = Array.from(activeEmotions);
+            if (emotionList.length === 0) {
+                legendContainer.innerHTML = '<span style="color: var(--text-muted)">No data yet</span>';
+            } else {
+                legendContainer.innerHTML = emotionList.map(emotion => `
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: ${emotionColors[emotion]}"></div>
+                        <span>${emotionEmojis[emotion]} ${emotionLabels[emotion]}</span>
+                    </div>
+                `).join('');
+            }
+
+            // 시간 라벨
+            const hours = [0, 4, 8, 12, 16, 20, 24];
+            labelsContainer.innerHTML = hours.map(h => 
+                `<span class="chart-label">${h.toString().padStart(2, '0')}:00</span>`
+            ).join('');
+
+            // Area Chart 그리기
+            const width = 800;
+            const height = 250;
+            const padding = 20;
+            
+            let paths = '';
+            
+            if (emotionList.length > 0) {
+                emotionList.forEach((emotion, emotionIndex) => {
+                    const points = [];
+                    
+                    for (let hour = 0; hour < 24; hour++) {
+                        const x = padding + (hour / 23) * (width - 2 * padding);
+                        let y = height - padding;
+                        
+                        if (emotionsByHour[hour] && emotionsByHour[hour].emotion === emotion) {
+                            const intensity = Math.min(emotionsByHour[hour].count * 30, height - 2 * padding);
+                            y = height - padding - intensity;
+                        }
+                        
+                        points.push({ x, y });
+                    }
+                    
+                    // Smooth curve path
+                    let pathD = `M ${points[0].x} ${height - padding}`;
+                    pathD += ` L ${points[0].x} ${points[0].y}`;
+                    
+                    for (let i = 1; i < points.length; i++) {
+                        const prev = points[i - 1];
+                        const curr = points[i];
+                        const cpx = (prev.x + curr.x) / 2;
+                        pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+                    }
+                    
+                    pathD += ` L ${points[points.length - 1].x} ${height - padding}`;
+                    pathD += ' Z';
+                    
+                    const color = emotionColors[emotion];
+                    paths += `
+                        <path d="${pathD}" fill="${color}" fill-opacity="0.6" stroke="${color}" stroke-width="2"/>
+                    `;
+                });
+            }
+
+            // Grid lines
+            let gridLines = '';
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (i / 4) * (height - 2 * padding);
+                gridLines += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+            }
+
+            svg.innerHTML = gridLines + paths;
         }
 
         // 감정 분포
         async function fetchDistribution() {
             const res = await fetch(`${API_BASE}/api/stats/emotions`);
             const data = await res.json();
-            distributionData = data;
-            updateDistributionUI(data);
+            drawDistribution(data);
+        }
+
+        function drawDistribution(data) {
+            const svg = document.getElementById('donutChart');
+            const barsContainer = document.getElementById('emotionBars');
+            
+            document.getElementById('donutTotal').textContent = data.total;
+
+            // 도넛 차트
+            const radius = 37;
+            const circumference = 2 * Math.PI * radius;
+            let offset = 0;
+            let segments = '';
+
+            if (data.distribution.length === 0) {
+                segments = `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="25"/>`;
+            } else {
+                data.distribution.forEach(item => {
+                    const length = (item.percentage / 100) * circumference;
+                    const color = emotionColors[item.emotion] || '#e2e8f0';
+                    
+                    segments += `
+                        <circle cx="50" cy="50" r="${radius}" 
+                            class="donut-segment"
+                            stroke="${color}"
+                            stroke-dasharray="${length} ${circumference - length}"
+                            stroke-dashoffset="${-offset}"/>
+                    `;
+                    offset += length;
+                });
+            }
+
+            svg.innerHTML = segments;
+
+            // 바 차트
+            if (data.distribution.length === 0) {
+                barsContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div>No data yet</div>';
+            } else {
+                barsContainer.innerHTML = data.distribution.slice(0, 5).map(item => `
+                    <div class="emotion-bar-item">
+                        <div class="emotion-bar-label">${emotionEmojis[item.emotion]} ${emotionLabels[item.emotion]}</div>
+                        <div class="emotion-bar-track">
+                            <div class="emotion-bar-fill" style="width: ${item.percentage}%; background: ${emotionColors[item.emotion]}"></div>
+                        </div>
+                        <div class="emotion-bar-value">${item.percentage}%</div>
+                    </div>
+                `).join('');
+            }
         }
 
         // 최근 기록
         async function fetchRecent() {
-            const res = await fetch(`${API_BASE}/api/stats/recent?limit=20`);
+            const res = await fetch(`${API_BASE}/api/stats/recent?limit=10`);
             const data = await res.json();
-            recentData = data.logs;
-            updateRecentUI(data.logs);
+            updateRecentList(data.logs);
         }
 
-        // 요약 통계
-        async function fetchSummary() {
-            const res = await fetch(`${API_BASE}/api/stats/summary`);
-            const data = await res.json();
-            updateSummaryUI(data);
-        }
-
-        // UI 업데이트 함수들
-        function updateCurrentUI(data) {
-            const lamp = document.getElementById('lampPreview');
-            const color = data.colorHex || '#50C878';
-            lamp.style.background = color;
-            lamp.style.boxShadow = `0 0 60px ${color}80`;
-
-            document.getElementById('currentEmoji').textContent = data.emotionEmoji || '😌';
-            document.getElementById('currentEmotion').textContent = data.emotionKorean || '평온';
-            document.getElementById('currentHex').textContent = color;
-            document.getElementById('currentMode').textContent = data.mode || 'AUTO';
-            document.getElementById('currentHue').textContent = `${data.hue || 120}°`;
-            document.getElementById('currentSat').textContent = `${data.saturation || 70}%`;
-            document.getElementById('currentBright').textContent = `${data.brightness || 70}%`;
-            
-            const weather = data.weather 
-                ? `${data.weatherEmoji || ''} ${data.temperature || '-'}°C`
-                : '-';
-            document.getElementById('currentWeather').textContent = weather;
-        }
-
-        function updateTimelineUI(timeline) {
-            const now = new Date().getHours();
-            
-            timeline.forEach(item => {
-                const bar = document.getElementById(`hour-${item.hour}`);
-                if (!bar) return;
-                
-                bar.classList.remove('active', 'has-data');
-                bar.style.background = '';
-                bar.textContent = '';
-                
-                if (item.hour === now) {
-                    bar.classList.add('active');
-                }
-                
-                if (item.emotion && item.count > 0) {
-                    bar.classList.add('has-data');
-                    bar.style.background = item.colorHex || emotionColors[item.emotion];
-                    bar.textContent = item.emoji;
-                }
-            });
-        }
-
-        function updateDistributionUI(data) {
-            const svg = document.getElementById('donutChart');
-            const legend = document.getElementById('legend');
-            
-            document.getElementById('totalCount').textContent = data.total;
-            
-            // 도넛 차트 그리기
-            svg.innerHTML = '';
-            let offset = 0;
-            const radius = 35;
-            const circumference = 2 * Math.PI * radius;
-            
-            if (data.distribution.length === 0) {
-                // 데이터 없을 때
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle.setAttribute('cx', '50');
-                circle.setAttribute('cy', '50');
-                circle.setAttribute('r', radius);
-                circle.setAttribute('class', 'donut-segment');
-                circle.setAttribute('stroke', '#333');
-                circle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
-                svg.appendChild(circle);
-            } else {
-                data.distribution.forEach(item => {
-                    const segmentLength = (item.percentage / 100) * circumference;
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', '50');
-                    circle.setAttribute('cy', '50');
-                    circle.setAttribute('r', radius);
-                    circle.setAttribute('class', 'donut-segment');
-                    circle.setAttribute('stroke', emotionColors[item.emotion] || '#666');
-                    circle.setAttribute('stroke-dasharray', `${segmentLength} ${circumference - segmentLength}`);
-                    circle.setAttribute('stroke-dashoffset', -offset);
-                    svg.appendChild(circle);
-                    offset += segmentLength;
-                });
-            }
-            
-            // 범례
-            legend.innerHTML = data.distribution.map(item => `
-                <div class="legend-item">
-                    <div class="legend-color" style="background: ${emotionColors[item.emotion] || '#666'}"></div>
-                    <div class="legend-text">
-                        <div class="legend-emotion">${item.emoji} ${item.korean}</div>
-                        <div class="legend-percent">${item.percentage}% (${item.count})</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateRecentUI(logs) {
-            const container = document.getElementById('recentLogs');
+        function updateRecentList(logs) {
+            const container = document.getElementById('recentList');
             
             if (logs.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">아직 기록이 없습니다</div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>No activity yet</div>';
                 return;
             }
-            
+
             container.innerHTML = logs.map(log => `
-                <div class="log-item">
-                    <div class="log-color" style="background: ${log.colorHex || '#50C878'}"></div>
-                    <div class="log-emoji">${log.emoji}</div>
-                    <div class="log-content">
-                        <div class="log-emotion">${log.emotionKorean}</div>
-                        <div class="log-time">${formatTime(log.timestamp)}</div>
+                <div class="recent-item">
+                    <div class="recent-color" style="background: ${log.colorHex || emotionColors[log.emotion]}"></div>
+                    <div class="recent-emoji">${log.emoji || emotionEmojis[log.emotion]}</div>
+                    <div class="recent-content">
+                        <div class="recent-emotion">${log.emotionKorean || emotionLabels[log.emotion]}</div>
+                        <div class="recent-time">${formatTime(log.timestamp)}</div>
                     </div>
                 </div>
             `).join('');
-        }
-
-        function updateSummaryUI(data) {
-            document.getElementById('summaryTotal').textContent = data.totalAnalyses;
-            document.getElementById('summaryToday').textContent = data.todayAnalyses;
-            document.getElementById('summaryTopEmotion').textContent = 
-                `${data.topEmotionEmoji} ${data.topEmotionKorean}`;
-            document.getElementById('summaryAvgHue').textContent = `${data.averageHue}°`;
         }
 
         function updateStatus(connected) {
             const dot = document.getElementById('statusDot');
             const text = document.getElementById('statusText');
             
-            if (connected) {
-                dot.style.background = '#4caf50';
-                text.textContent = '연결됨';
-            } else {
-                dot.style.background = '#f44336';
-                text.textContent = '연결 끊김';
-            }
+            dot.style.background = connected ? '#48bb78' : '#fc8181';
+            text.textContent = connected ? 'Connected' : 'Disconnected';
         }
 
         function formatTime(timestamp) {
@@ -788,11 +887,11 @@
             const now = new Date();
             const diff = now - date;
             
-            if (diff < 60000) return '방금 전';
-            if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
-            if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
             
-            return date.toLocaleString('ko-KR', {
+            return date.toLocaleString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',

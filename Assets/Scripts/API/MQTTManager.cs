@@ -9,17 +9,18 @@ using System.Text;
 /// 감정 분석, 날씨 정보, 상태 변경 로그를 수집하여 대시보드에 표시
 /// 
 /// 역할: 로그 수집 전용 (상태 동기화는 FirebaseManager 담당)
+/// 통신 방향: Unity → Server (일방향)
 /// </summary>
 public class MQTTManager : MonoBehaviour
 {
     [Header("Server Settings")]
-    [SerializeField] private string serverUrl = "https://your-app.cloudtype.app";
+    [SerializeField] private string serverUrl = "https://port-0-motorcontrol-miqbz64b349f00ff.sel3.cloudtype.app";
     [SerializeField] private bool autoConnect = true;
+    [SerializeField] private float reconnectInterval = 30f;
 
     [Header("Auto Log Settings")]
     [SerializeField] private bool autoLogEmotion = true;
     [SerializeField] private bool autoLogWeather = true;
-    [SerializeField] private bool autoLogState = true;
 
     [Header("Components")]
     [SerializeField] private ClaudeManager claudeManager;
@@ -35,6 +36,8 @@ public class MQTTManager : MonoBehaviour
     public event Action<string> OnError;
 
     public bool IsConnected { get; private set; } = false;
+
+    private Coroutine _reconnectCoroutine;
 
     #region Unity Lifecycle
 
@@ -60,6 +63,7 @@ public class MQTTManager : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeFromEvents();
+        StopReconnect();
     }
 
     #endregion
@@ -68,22 +72,16 @@ public class MQTTManager : MonoBehaviour
 
     private void SubscribeToEvents()
     {
-        // 감정 분석 완료 시
+        // 감정 분석 완료 시 자동 로그
         if (claudeManager != null && autoLogEmotion)
         {
             claudeManager.OnEmotionAnalyzed += OnEmotionAnalyzed;
         }
 
-        // 날씨 업데이트 시
+        // 날씨 업데이트 시 자동 로그
         if (weatherManager != null && autoLogWeather)
         {
             weatherManager.OnWeatherUpdated += OnWeatherUpdated;
-        }
-
-        // HSV 변경 시 (옵션)
-        if (hsvController != null && autoLogState)
-        {
-            hsvController.OnHSVChanged += OnHSVChanged;
         }
     }
 
@@ -97,11 +95,6 @@ public class MQTTManager : MonoBehaviour
         if (weatherManager != null)
         {
             weatherManager.OnWeatherUpdated -= OnWeatherUpdated;
-        }
-
-        if (hsvController != null)
-        {
-            hsvController.OnHSVChanged -= OnHSVChanged;
         }
     }
 
@@ -117,12 +110,6 @@ public class MQTTManager : MonoBehaviour
     private void OnWeatherUpdated(WeatherData data)
     {
         LogWeather(data);
-    }
-
-    private void OnHSVChanged(float h, float s, float v)
-    {
-        // HSV 변경은 너무 자주 발생할 수 있으므로
-        // 필요시 디바운싱 적용 가능
     }
 
     #endregion
@@ -162,9 +149,48 @@ public class MQTTManager : MonoBehaviour
     /// </summary>
     public void Disconnect()
     {
+        StopReconnect();
         IsConnected = false;
         OnDisconnected?.Invoke();
         Log("Disconnected from server");
+    }
+
+    /// <summary>
+    /// 재연결 시작
+    /// </summary>
+    private void StartReconnect()
+    {
+        if (_reconnectCoroutine == null)
+        {
+            _reconnectCoroutine = StartCoroutine(ReconnectCoroutine());
+        }
+    }
+
+    /// <summary>
+    /// 재연결 중지
+    /// </summary>
+    private void StopReconnect()
+    {
+        if (_reconnectCoroutine != null)
+        {
+            StopCoroutine(_reconnectCoroutine);
+            _reconnectCoroutine = null;
+        }
+    }
+
+    private IEnumerator ReconnectCoroutine()
+    {
+        while (!IsConnected)
+        {
+            Log($"Reconnecting in {reconnectInterval} seconds...");
+            yield return new WaitForSeconds(reconnectInterval);
+            
+            if (!IsConnected)
+            {
+                yield return ConnectCoroutine();
+            }
+        }
+        _reconnectCoroutine = null;
     }
 
     /// <summary>
@@ -250,12 +276,21 @@ public class MQTTManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 수동 색상 변경 시 호출
-    /// </summary>
-    public void LogManualColorChange(string colorHex)
+    /// 수동 색상 변경 시 호출 - 실시간 상태 전송
+    /// </summary>
+    public void LogManualState(int hue, int saturation, int brightness, string colorHex)
     {
-        var state = hsvController?.GetLampState();
-        LogStateChange("manual_color", state?.mode ?? "MANUAL", $"Color set to {colorHex}");
+        if (!IsConnected) return;
+        
+        string payload = $@"{{
+            ""mode"": ""MANUAL"",
+            ""hue"": {hue},
+            ""saturation"": {saturation},
+            ""brightness"": {brightness},
+            ""colorHex"": ""{colorHex}""
+        }}";
+        
+        StartCoroutine(PostLogCoroutine("/api/log/manualstate", payload));
     }
 
     #endregion
@@ -276,6 +311,7 @@ public class MQTTManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 IsConnected = true;
+                StopReconnect();
                 Log($"★ Connected! Response: {request.downloadHandler.text}");
                 OnConnected?.Invoke();
             }
@@ -285,6 +321,9 @@ public class MQTTManager : MonoBehaviour
                 LogError($"Response Code: {request.responseCode}");
                 OnError?.Invoke(request.error);
                 IsConnected = false;
+                
+                // 자동 재연결 시작
+                StartReconnect();
             }
         }
     }
@@ -293,7 +332,7 @@ public class MQTTManager : MonoBehaviour
     {
         string url = $"{serverUrl}{endpoint}";
 
-        Log($"Sending log to {endpoint}: {payload.Substring(0, Mathf.Min(100, payload.Length))}...");
+        Log($"Sending log to {endpoint}");
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
@@ -314,11 +353,12 @@ public class MQTTManager : MonoBehaviour
                 LogError($"Log failed: {request.error}");
                 OnError?.Invoke(request.error);
                 
-                // 연결 끊김 감지
+                // 연결 끊김 감지 시 재연결 시도
                 if (request.result == UnityWebRequest.Result.ConnectionError)
                 {
                     IsConnected = false;
                     OnDisconnected?.Invoke();
+                    StartReconnect();
                 }
             }
         }

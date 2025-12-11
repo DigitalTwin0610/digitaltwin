@@ -223,6 +223,24 @@ app.post('/api/log/state', (req, res) => {
     }
 });
 
+// Manual 상태 실시간 업데이트
+app.post('/api/log/manualstate', (req, res) => {
+    try {
+        const { mode, hue, saturation, brightness, colorHex } = req.body;
+        
+        currentState.mode = mode || 'MANUAL';
+        currentState.hue = hue || 0;
+        currentState.saturation = saturation || 0;
+        currentState.brightness = brightness || 0;
+        currentState.colorHex = colorHex || '#FFFFFF';
+        currentState.timestamp = Date.now();
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== 통계 API ====================
 
 // 오늘 통계
