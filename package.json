@@ -1,7 +1,7 @@
 {
   "name": "emolamp-statistics-server",
-  "version": "2.0.0",
-  "description": "EmoLamp Statistics Dashboard Server",
+  "version": "3.0.0",
+  "description": "EmoLamp Statistics Dashboard Server with Advanced Analytics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -17,5 +17,14 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "keywords": [
+    "emolamp",
+    "emotion",
+    "iot",
+    "dashboard",
+    "statistics"
+  ],
+  "author": "Team 16",
+  "license": "MIT"
 }
