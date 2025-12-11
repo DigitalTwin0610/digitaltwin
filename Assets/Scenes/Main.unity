@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 6a44df31c926b534f9034a8891efbd37, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -434,8 +434,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccdc31b2492e5e54c8469472ae975d9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiKey: 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
-  model: claude-sonnet-4-20250514
+  apiKey: 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
+  model: claude-opus-4-5-20251101
   showDebugLogs: 1
 --- !u!1 &280342806
 GameObject:
@@ -1104,7 +1104,6 @@ MonoBehaviour:
   darkColor: {r: 0.05, g: 0.08, b: 0.15, a: 1}
   smoothSpeed: 2
   currentBrightness: 50
-  serialController: {fileID: 0}
   showDebugLogs: 1
 --- !u!1 &526461274
 GameObject:
@@ -1300,7 +1299,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 830a4fac4541d0a42a37773b38f8132b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverUrl: https://port-0-motorcontrol-miqbz64b349f00ff.sel3.cloudtype.app
+  serverUrl: https://port-0-motorcontrol-miqbz64b349f00ff.sel3.cloudtype.app/
   pollInterval: 2
   autoConnect: 1
   showDebugLogs: 1

@@ -18,13 +18,11 @@ public class SerialController : MonoBehaviour
     [SerializeField] private bool showDebugLogs = true;
 
     // 이벤트
-    public event Action<int> OnBrightnessReceived;  // 조도값 수신 (0-100)
     public event Action OnConnected;
     public event Action OnDisconnected;
-
+    
     // 상태
     public bool IsConnected => _serialPort != null && _serialPort.IsOpen;
-    public int LastBrightness { get; private set; } = 50;
 
     private SerialPort _serialPort;
     private Thread _readThread;
@@ -272,22 +270,15 @@ public class SerialController : MonoBehaviour
     {
         Log($"Recieve: {data}");
 
-        // 형식: LIGHT:72
-        if (data.StartsWith("LIGHT:"))
-        {
-            string valueStr = data.Substring(6);
-            if (int.TryParse(valueStr, out int brightness))
-            {
-                brightness = Mathf.Clamp(brightness, 0, 100);
-                LastBrightness = brightness;
-                OnBrightnessReceived?.Invoke(brightness);
-                Log($"Light value parsing: {brightness}%");
-            }
-        }
         // 형식: STATUS:OK
-        else if (data.StartsWith("STATUS:"))
+        if (data.StartsWith("STATUS:"))
         {
             Log($"Arduino Status: {data.Substring(7)}");
+        }
+        // 형식: DEBUG:...
+        else if (data.StartsWith("DEBUG:"))
+        {
+            Log($"Arduino Debug: {data.Substring(6)}");
         }
     }
 

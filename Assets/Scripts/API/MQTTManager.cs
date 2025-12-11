@@ -5,15 +5,26 @@ using System.Collections;
 using System.Text;
 
 /// <summary>
-/// Cloudtype 서버를 통한 MQTT 스타일 실시간 통신 매니저
-/// WebSocket 대신 HTTP Long Polling 방식으로 구현 (Unity 호환성)
+/// Cloudtype 서버로 통계 로그를 전송하는 매니저
+/// 감정 분석, 날씨 정보, 상태 변경 로그를 수집하여 대시보드에 표시
+/// 
+/// 역할: 로그 수집 전용 (상태 동기화는 FirebaseManager 담당)
 /// </summary>
 public class MQTTManager : MonoBehaviour
 {
     [Header("Server Settings")]
     [SerializeField] private string serverUrl = "https://your-app.cloudtype.app";
-    [SerializeField] private float pollInterval = 2f;
     [SerializeField] private bool autoConnect = true;
+
+    [Header("Auto Log Settings")]
+    [SerializeField] private bool autoLogEmotion = true;
+    [SerializeField] private bool autoLogWeather = true;
+    [SerializeField] private bool autoLogState = true;
+
+    [Header("Components")]
+    [SerializeField] private ClaudeManager claudeManager;
+    [SerializeField] private WeatherManager weatherManager;
+    [SerializeField] private HSVController hsvController;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -21,20 +32,24 @@ public class MQTTManager : MonoBehaviour
     // 이벤트
     public event Action OnConnected;
     public event Action OnDisconnected;
-    public event Action<string, string> OnMessageReceived;  // (topic, payload)
     public event Action<string> OnError;
 
     public bool IsConnected { get; private set; } = false;
-
-    private Coroutine _pollCoroutine;
-    private string _clientId;
-    private long _lastMessageTime = 0;
 
     #region Unity Lifecycle
 
     private void Start()
     {
-        _clientId = $"unity_{SystemInfo.deviceUniqueIdentifier.Substring(0, 8)}";
+        // 컴포넌트 자동 찾기
+        if (claudeManager == null)
+            claudeManager = FindObjectOfType<ClaudeManager>();
+        if (weatherManager == null)
+            weatherManager = FindObjectOfType<WeatherManager>();
+        if (hsvController == null)
+            hsvController = FindObjectOfType<HSVController>();
+
+        // 이벤트 구독
+        SubscribeToEvents();
 
         if (autoConnect)
         {
@@ -44,7 +59,70 @@ public class MQTTManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        Disconnect();
+        UnsubscribeFromEvents();
+    }
+
+    #endregion
+
+    #region Event Subscription
+
+    private void SubscribeToEvents()
+    {
+        // 감정 분석 완료 시
+        if (claudeManager != null && autoLogEmotion)
+        {
+            claudeManager.OnEmotionAnalyzed += OnEmotionAnalyzed;
+        }
+
+        // 날씨 업데이트 시
+        if (weatherManager != null && autoLogWeather)
+        {
+            weatherManager.OnWeatherUpdated += OnWeatherUpdated;
+        }
+
+        // HSV 변경 시 (옵션)
+        if (hsvController != null && autoLogState)
+        {
+            hsvController.OnHSVChanged += OnHSVChanged;
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (claudeManager != null)
+        {
+            claudeManager.OnEmotionAnalyzed -= OnEmotionAnalyzed;
+        }
+
+        if (weatherManager != null)
+        {
+            weatherManager.OnWeatherUpdated -= OnWeatherUpdated;
+        }
+
+        if (hsvController != null)
+        {
+            hsvController.OnHSVChanged -= OnHSVChanged;
+        }
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    private void OnEmotionAnalyzed(EmotionResult result)
+    {
+        LogEmotion(result);
+    }
+
+    private void OnWeatherUpdated(WeatherData data)
+    {
+        LogWeather(data);
+    }
+
+    private void OnHSVChanged(float h, float s, float v)
+    {
+        // HSV 변경은 너무 자주 발생할 수 있으므로
+        // 필요시 디바운싱 적용 가능
     }
 
     #endregion
@@ -60,7 +138,7 @@ public class MQTTManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 서버 연결
+    /// 서버 연결 확인
     /// </summary>
     public void Connect()
     {
@@ -72,7 +150,7 @@ public class MQTTManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(serverUrl) || serverUrl.Contains("your-app"))
         {
-            LogError("Invalid server URL");
+            LogError("Invalid server URL. Please set the Cloudtype server URL.");
             return;
         }
 
@@ -80,70 +158,114 @@ public class MQTTManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 서버 연결 해제
+    /// 연결 해제
     /// </summary>
     public void Disconnect()
     {
-        if (_pollCoroutine != null)
-        {
-            StopCoroutine(_pollCoroutine);
-            _pollCoroutine = null;
-        }
-
         IsConnected = false;
         OnDisconnected?.Invoke();
         Log("Disconnected from server");
     }
 
     /// <summary>
-    /// 메시지 발행
+    /// 감정 분석 결과 로그 전송
     /// </summary>
-    public void Publish(string topic, string payload)
+    public void LogEmotion(EmotionResult result)
     {
-        if (!IsConnected)
-        {
-            LogError("Not connected to server");
-            return;
-        }
+        if (!IsConnected) return;
 
-        StartCoroutine(PublishCoroutine(topic, payload));
-    }
-
-    /// <summary>
-    /// 램프 상태 발행
-    /// </summary>
-    public void PublishLampState(LampState state)
-    {
+        var state = hsvController?.GetLampState();
+        
         string payload = $@"{{
-            ""mode"": ""{state.mode}"",
-            ""emotion"": ""{state.emotion}"",
-            ""hue"": {state.hue},
-            ""saturation"": {state.saturation},
-            ""brightness"": {state.brightness},
-            ""colorHex"": ""{state.colorHex}""
+            ""emotion"": ""{result.emotion.ToString().ToLower()}"",
+            ""hue"": {result.hue},
+            ""saturation"": {state?.saturation ?? 70},
+            ""brightness"": {state?.brightness ?? 70},
+            ""summary"": ""{EscapeJson(result.summary)}"",
+            ""colorHex"": ""{state?.colorHex ?? "#50C878"}""
         }}";
 
-        Publish("emolamp/state", payload);
+        StartCoroutine(PostLogCoroutine("/api/log/emotion", payload));
     }
 
     /// <summary>
-    /// LED 색상 발행
+    /// 감정 직접 로그 (EmotionResult 없이)
     /// </summary>
-    public void PublishLedColor(int r, int g, int b)
+    public void LogEmotionDirect(string emotion, int hue, int saturation, int brightness, string colorHex, string summary = "")
     {
-        string payload = $@"{{""r"":{r},""g"":{g},""b"":{b}}}";
-        Publish("emolamp/led", payload);
+        if (!IsConnected) return;
+
+        string payload = $@"{{
+            ""emotion"": ""{emotion}"",
+            ""hue"": {hue},
+            ""saturation"": {saturation},
+            ""brightness"": {brightness},
+            ""summary"": ""{EscapeJson(summary)}"",
+            ""colorHex"": ""{colorHex}""
+        }}";
+
+        StartCoroutine(PostLogCoroutine("/api/log/emotion", payload));
+    }
+
+    /// <summary>
+    /// 날씨 정보 로그 전송
+    /// </summary>
+    public void LogWeather(WeatherData data)
+    {
+        if (!IsConnected) return;
+
+        string payload = $@"{{
+            ""temperature"": {data.temperature},
+            ""humidity"": {data.humidity},
+            ""condition"": ""{data.conditionText}"",
+            ""description"": ""{EscapeJson(data.description)}"",
+            ""cityName"": ""{data.cityName}""
+        }}";
+
+        StartCoroutine(PostLogCoroutine("/api/log/weather", payload));
+    }
+
+    /// <summary>
+    /// 상태 변경 로그 전송
+    /// </summary>
+    public void LogStateChange(string action, string mode, string details = "")
+    {
+        if (!IsConnected) return;
+
+        string payload = $@"{{
+            ""mode"": ""{mode}"",
+            ""action"": ""{action}"",
+            ""details"": {{ ""info"": ""{EscapeJson(details)}"" }}
+        }}";
+
+        StartCoroutine(PostLogCoroutine("/api/log/state", payload));
+    }
+
+    /// <summary>
+    /// 모드 변경 시 호출
+    /// </summary>
+    public void LogModeChange(string newMode)
+    {
+        LogStateChange("mode_change", newMode, $"Mode changed to {newMode}");
+    }
+
+    /// <summary>
+    /// 수동 색상 변경 시 호출
+    /// </summary>
+    public void LogManualColorChange(string colorHex)
+    {
+        var state = hsvController?.GetLampState();
+        LogStateChange("manual_color", state?.mode ?? "MANUAL", $"Color set to {colorHex}");
     }
 
     #endregion
 
-    #region Connection & Polling
+    #region Coroutines
 
     private IEnumerator ConnectCoroutine()
     {
-        Log($"Trying to connect: {serverUrl}");
+        Log($"Connecting to: {serverUrl}");
 
-        // 서버 상태 확인
         string url = $"{serverUrl}/api/status";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -154,126 +276,50 @@ public class MQTTManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 IsConnected = true;
-                Log("Success to Connect");
+                Log($"★ Connected! Response: {request.downloadHandler.text}");
                 OnConnected?.Invoke();
-
-                // 폴링 시작
-                _pollCoroutine = StartCoroutine(PollCoroutine());
             }
             else
             {
-                LogError($"Failed Connected: {request.error}");
+                LogError($"★ Connection FAILED: {request.error}");
+                LogError($"Response Code: {request.responseCode}");
                 OnError?.Invoke(request.error);
                 IsConnected = false;
             }
         }
     }
 
-    private IEnumerator PollCoroutine()
+    private IEnumerator PostLogCoroutine(string endpoint, string payload)
     {
-        while (IsConnected)
-        {
-            yield return new WaitForSeconds(pollInterval);
+        string url = $"{serverUrl}{endpoint}";
 
-            string url = $"{serverUrl}/api/poll?clientId={_clientId}&since={_lastMessageTime}";
-
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
-            {
-                request.timeout = 30;
-                yield return request.SendWebRequest();
-
-                if (request.result == UnityWebRequest.Result.Success)
-                {
-                    string response = request.downloadHandler.text;
-                    
-                    if (!string.IsNullOrEmpty(response) && response != "null" && response != "[]")
-                    {
-                        ProcessPollResponse(response);
-                    }
-                }
-                else if (request.result == UnityWebRequest.Result.ConnectionError)
-                {
-                    LogError("Connection lost");
-                    IsConnected = false;
-                    OnDisconnected?.Invoke();
-                    break;
-                }
-            }
-        }
-    }
-
-    private void ProcessPollResponse(string json)
-    {
-        try
-        {
-            Log($"Pulling Response: {json}");
-
-            // 간단한 메시지 파싱
-            // 형식: {"topic":"emolamp/state","payload":"{...}","timestamp":123456}
-            
-            if (json.Contains("\"topic\""))
-            {
-                string topic = ExtractStringValue(json, "topic");
-                string payload = ExtractStringValue(json, "payload");
-                string timestampStr = ExtractNumberValue(json, "timestamp");
-
-                if (!string.IsNullOrEmpty(topic))
-                {
-                    // 이스케이프 문자 복원
-                    if (!string.IsNullOrEmpty(payload))
-                    {
-                        payload = payload.Replace("\\\"", "\"").Replace("\\\\", "\\");
-                    }
-
-                    Log($"Recieve Massage: [{topic}] {payload}");
-                    OnMessageReceived?.Invoke(topic, payload);
-
-                    if (long.TryParse(timestampStr, out long timestamp))
-                    {
-                        _lastMessageTime = timestamp;
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            LogError($"Polling Response Parsing Error: {e.Message}");
-        }
-    }
-
-    #endregion
-
-    #region Publish
-
-    private IEnumerator PublishCoroutine(string topic, string payload)
-    {
-        string url = $"{serverUrl}/api/publish";
-
-        string json = $@"{{
-            ""topic"": ""{topic}"",
-            ""payload"": {payload},
-            ""clientId"": ""{_clientId}""
-        }}";
-
-        Log($"발행: [{topic}] {payload}");
+        Log($"Sending log to {endpoint}: {payload.Substring(0, Mathf.Min(100, payload.Length))}...");
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(payload);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
+            request.timeout = 10;
 
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Log("Publish Success");
+                Log($"Log sent successfully: {endpoint}");
             }
             else
             {
-                LogError($"Publish Failed: {request.error}");
+                LogError($"Log failed: {request.error}");
                 OnError?.Invoke(request.error);
+                
+                // 연결 끊김 감지
+                if (request.result == UnityWebRequest.Result.ConnectionError)
+                {
+                    IsConnected = false;
+                    OnDisconnected?.Invoke();
+                }
             }
         }
     }
@@ -282,65 +328,15 @@ public class MQTTManager : MonoBehaviour
 
     #region Utility
 
-    private string ExtractStringValue(string json, string key)
+    private string EscapeJson(string text)
     {
-        string pattern = $"\"{key}\":\"";
-        int index = json.IndexOf(pattern);
-        if (index < 0) return null;
-
-        int startIndex = index + pattern.Length;
-        int endIndex = FindStringEnd(json, startIndex);
-        if (endIndex < 0) return null;
-
-        return json.Substring(startIndex, endIndex - startIndex);
-    }
-
-    private int FindStringEnd(string json, int startIndex)
-    {
-        bool escaped = false;
-        for (int i = startIndex; i < json.Length; i++)
-        {
-            if (escaped)
-            {
-                escaped = false;
-                continue;
-            }
-            if (json[i] == '\\')
-            {
-                escaped = true;
-                continue;
-            }
-            if (json[i] == '"')
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private string ExtractNumberValue(string json, string key)
-    {
-        string pattern = $"\"{key}\":";
-        int index = json.IndexOf(pattern);
-        if (index < 0) return null;
-
-        int startIndex = index + pattern.Length;
-        string result = "";
-
-        for (int i = startIndex; i < json.Length; i++)
-        {
-            char c = json[i];
-            if (char.IsDigit(c) || c == '-' || c == '.')
-            {
-                result += c;
-            }
-            else if (result.Length > 0)
-            {
-                break;
-            }
-        }
-
-        return result;
+        if (string.IsNullOrEmpty(text)) return "";
+        return text
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t");
     }
 
     #endregion

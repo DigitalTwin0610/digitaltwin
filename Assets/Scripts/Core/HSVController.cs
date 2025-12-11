@@ -171,6 +171,74 @@ public class HSVController : MonoBehaviour
         float v = Mathf.Lerp(30f, 100f, lightPercent / 100f);
         SetBrightness(v);
     }
+    
+    /// <summary>
+    /// 온도 기반 Hue 설정
+    /// </summary>
+    public void SetHueFromTemperature(int temperature)
+    {
+        float h;
+        
+        if (temperature <= -10)
+        {
+            // 영하 10도 이하: 진한 파란색
+            h = 240f;
+        }
+        else if (temperature <= 0)
+        {
+            // -10도 ~ 0도: 파란색 (220-240)
+            float t = Mathf.InverseLerp(-10f, 0f, temperature);
+            h = Mathf.Lerp(240f, 200f, t);
+        }
+        else if (temperature <= 10)
+        {
+            // 0도 ~ 10도: 시안 (200-160)
+            float t = Mathf.InverseLerp(0f, 10f, temperature);
+            h = Mathf.Lerp(200f, 160f, t);
+        }
+        else if (temperature <= 20)
+        {
+            // 10도 ~ 20도: 녹색 (160-120)
+            float t = Mathf.InverseLerp(10f, 20f, temperature);
+            h = Mathf.Lerp(160f, 120f, t);
+        }
+        else if (temperature <= 28)
+        {
+            // 20도 ~ 28도: 노란색 (120-50)
+            float t = Mathf.InverseLerp(20f, 28f, temperature);
+            h = Mathf.Lerp(120f, 50f, t);
+        }
+        else
+        {
+            // 28도 이상: 주황~빨강 (50-0)
+            float t = Mathf.InverseLerp(28f, 35f, Mathf.Min(temperature, 35f));
+            h = Mathf.Lerp(50f, 0f, t);
+        }
+
+        SetHue(h);
+        Log($"Temperature {temperature}°C → Hue {h:F0}°");
+    }
+
+    /// <summary>
+    /// 날씨 기반 Brightness 설정
+    /// </summary>
+    public void SetBrightnessFromWeather(WeatherCondition weather)
+    {
+        float v = weather switch
+        {
+            WeatherCondition.Clear => 100f,
+            WeatherCondition.Clouds => 85f,
+            WeatherCondition.Overcast => 65f,
+            WeatherCondition.Rain => 50f,
+            WeatherCondition.Snow => 80f,
+            WeatherCondition.Fog => 45f,
+            WeatherCondition.Storm => 40f,
+            _ => 70f
+        };
+        
+        SetBrightness(v);
+        Log($"Weather {weather} → Brightness {v}%");
+    }
 
     #endregion
 

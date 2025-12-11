@@ -1,7 +1,7 @@
 {
-  "name": "emolamp-server",
-  "version": "1.0.0",
-  "description": "EmoLamp MQTT-style IoT Server",
+  "name": "emolamp-statistics-server",
+  "version": "2.0.0",
+  "description": "EmoLamp Statistics Dashboard Server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

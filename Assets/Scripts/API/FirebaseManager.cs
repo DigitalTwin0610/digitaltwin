@@ -5,8 +5,8 @@ using System.Collections;
 using System.Text;
 
 /// <summary>
-/// Firebase Realtime Database와 연동하는 매니저
-/// 상태 저장 및 원격 제어 지원
+/// Firebase Realtime Databaseì™€ ì—°ë™í•˜ëŠ” ë§¤ë‹ˆì €
+/// ìƒíƒœ ì €ìž¥ ë° ì›ê²© ì œì–´ ì§€ì›
 /// </summary>
 public class FirebaseManager : MonoBehaviour
 {
@@ -18,11 +18,23 @@ public class FirebaseManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    // 이벤트
+    // ì´ë²¤íŠ¸
     public event Action<LampState> OnRemoteStateChanged;
     public event Action<string> OnSyncError;
-
-    public bool IsConnected { get; private set; } = false;
+    public event Action<bool> OnConnectionChanged;
+    private bool _isConnected = false;
+    public bool IsConnected 
+    { 
+        get => _isConnected;
+        private set
+        {
+            if (_isConnected != value)
+            {
+                _isConnected = value;
+                OnConnectionChanged?.Invoke(value);
+            }
+        }
+    }
     public LampState CurrentState { get; private set; }
 
     private LampState _lastSyncedState;
@@ -50,7 +62,7 @@ public class FirebaseManager : MonoBehaviour
     #region Public Methods
 
     /// <summary>
-    /// Database URL 설정
+    /// Database URL ì„¤ì •
     /// </summary>
     public void SetDatabaseUrl(string url)
     {
@@ -58,7 +70,7 @@ public class FirebaseManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 상태를 Firebase에 저장
+    /// í˜„ìž¬ ìƒíƒœë¥¼ Firebaseì— ì €ìž¥
     /// </summary>
     public void SaveState(LampState state)
     {
@@ -67,7 +79,7 @@ public class FirebaseManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 부분 업데이트 (특정 필드만)
+    /// ë¶€ë¶„ ì—…ë°ì´íŠ¸ (íŠ¹ì • í•„ë“œë§Œ)
     /// </summary>
     public void UpdateField(string field, object value)
     {
@@ -75,7 +87,7 @@ public class FirebaseManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Firebase에서 현재 상태 읽기
+    /// Firebaseì—ì„œ í˜„ìž¬ ìƒíƒœ ì½ê¸°
     /// </summary>
     public void LoadState(Action<LampState> callback)
     {
@@ -83,7 +95,7 @@ public class FirebaseManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 실시간 리스닝 시작
+    /// ì‹¤ì‹œê°„ ë¦¬ìŠ¤ë‹ ì‹œìž‘
     /// </summary>
     public void StartListening()
     {
@@ -91,12 +103,41 @@ public class FirebaseManager : MonoBehaviour
         {
             StopCoroutine(_listenerCoroutine);
         }
+        
+        // ì¦‰ì‹œ ì—°ê²° í™•ì¸
+        StartCoroutine(CheckConnectionCoroutine());
+        
         _listenerCoroutine = StartCoroutine(ListenForChangesCoroutine());
         Log("Start Listening");
     }
 
     /// <summary>
-    /// 실시간 리스닝 중지
+    /// ì´ˆê¸° ì—°ê²° ìƒíƒœ í™•ì¸
+    /// </summary>
+    private IEnumerator CheckConnectionCoroutine()
+    {
+        string url = $"{databaseUrl}/emolamp.json?shallow=true";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            request.timeout = 5;
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                IsConnected = true;
+                Log("Firebase ì—°ê²° ì„±ê³µ");
+            }
+            else
+            {
+                IsConnected = false;
+                LogError($"Firebase ì—°ê²° ì‹¤íŒ¨: {request.error}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// ì‹¤ì‹œê°„ ë¦¬ìŠ¤ë‹ ì¤‘ì§€
     /// </summary>
     public void StopListening()
     {
@@ -224,7 +265,7 @@ public class FirebaseManager : MonoBehaviour
                     {
                         LampState remoteState = JsonToState(json);
 
-                        // 원격에서 변경된 경우에만 이벤트 발생
+                        // ì›ê²©ì—ì„œ ë³€ê²½ëœ ê²½ìš°ì—ë§Œ ì´ë²¤íŠ¸ ë°œìƒ
                         if (HasRemoteChanges(remoteState))
                         {
                             Log("Remote State Changed!");
@@ -248,7 +289,7 @@ public class FirebaseManager : MonoBehaviour
     {
         if (_lastSyncedState == null) return true;
 
-        // mode 또는 manualColor가 변경되었는지 확인
+        // mode ë˜ëŠ” manualColorê°€ ë³€ê²½ë˜ì—ˆëŠ”ì§€ í™•ì¸
         return remote.mode != _lastSyncedState.mode ||
                remote.manualColorHex != _lastSyncedState.manualColorHex;
     }
@@ -382,7 +423,7 @@ public class FirebaseManager : MonoBehaviour
 }
 
 /// <summary>
-/// 램프 상태 데이터 클래스
+/// ëž¨í”„ ìƒíƒœ ë°ì´í„° í´ëž˜ìŠ¤
 /// </summary>
 [Serializable]
 public class LampState

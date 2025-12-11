@@ -19,9 +19,8 @@ public class BackgroundController : MonoBehaviour
     [SerializeField] private float smoothSpeed = 2f;
     [SerializeField, Range(0, 100)] private int currentBrightness = 50;
 
-    [Header("Components")]
-    [SerializeField] private SerialController serialController;
-
+    // SerialController 제거됨 - Cloudtype 연동으로 대체
+    
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
@@ -41,18 +40,6 @@ public class BackgroundController : MonoBehaviour
             mainCamera = Camera.main;
         }
 
-        // SerialController 자동 찾기
-        if (serialController == null)
-        {
-            serialController = FindObjectOfType<SerialController>();
-        }
-
-        // 이벤트 구독
-        if (serialController != null)
-        {
-            serialController.OnBrightnessReceived += OnBrightnessReceived;
-        }
-
         // 초기값 적용
         ApplyBrightness(_currentBrightness);
     }
@@ -69,10 +56,7 @@ public class BackgroundController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (serialController != null)
-        {
-            serialController.OnBrightnessReceived -= OnBrightnessReceived;
-        }
+        // 조도 센서 제거됨 - 별도 해제 불필요
     }
 
     #endregion
@@ -112,10 +96,7 @@ public class BackgroundController : MonoBehaviour
 
     #region Private Methods
 
-    private void OnBrightnessReceived(int brightness)
-    {
-        SetBrightness(brightness);
-    }
+    // 조도 센서 제거됨 - Cloudtype에서 직접 SetBrightness() 호출
 
     private void ApplyBrightness(float t)
     {

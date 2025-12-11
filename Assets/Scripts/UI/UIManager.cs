@@ -113,14 +113,22 @@ public class UIManager : MonoBehaviour
         if (firebaseManager != null)
         {
             firebaseManager.OnRemoteStateChanged += OnRemoteStateChanged;
+            firebaseManager.OnConnectionChanged += OnFirebaseConnectionChanged;
         }
 
-        // Serial
+        // MQTT - Cloudtype 브라이트니스 수신
+        if (mqttManager != null)
+        {
+            mqttManager.OnMessageReceived += OnMqttMessageReceived;
+            mqttManager.OnConnected += OnMqttConnected;        // ← 추가
+            mqttManager.OnDisconnected += OnMqttDisconnected;  // ← 추가
+        }
+
+        // Serial (조도 센서 제거됨 - 연결 상태만 확인)
         if (serialController != null)
         {
             serialController.OnConnected += OnSerialConnected;
             serialController.OnDisconnected += OnSerialDisconnected;
-            serialController.OnBrightnessReceived += OnBrightnessReceived;
         }
 
         // HSV
@@ -177,12 +185,16 @@ public class UIManager : MonoBehaviour
             claudeManager.OnEmotionAnalyzed -= OnEmotionAnalyzed;
             claudeManager.OnAnalysisError -= OnAnalysisError;
         }
-        if (firebaseManager != null) firebaseManager.OnRemoteStateChanged -= OnRemoteStateChanged;
+        if (firebaseManager != null) 
+        {
+            firebaseManager.OnRemoteStateChanged -= OnRemoteStateChanged;
+            firebaseManager.OnConnectionChanged -= OnFirebaseConnectionChanged;  // ← 추가
+        }
+        if (mqttManager != null) mqttManager.OnMessageReceived -= OnMqttMessageReceived;
         if (serialController != null)
         {
             serialController.OnConnected -= OnSerialConnected;
             serialController.OnDisconnected -= OnSerialDisconnected;
-            serialController.OnBrightnessReceived -= OnBrightnessReceived;
         }
         if (hsvController != null) hsvController.OnColorChanged -= OnHSVColorChanged;
     }
@@ -345,7 +357,9 @@ public class UIManager : MonoBehaviour
         // HSV 채도 업데이트 (AUTO 모드일 때만)
         if (!_isManualMode && hsvController != null)
         {
-            hsvController.SetSaturationFromWeather(data.condition);
+            hsvController.SetHueFromTemperature(data.temperature);      // ← 변경
+            hsvController.SetBrightnessFromWeather(data.condition);     // ← 변경
+            // 채도는 유지하거나 별도 설정
         }
 
         SaveCurrentState();
@@ -397,17 +411,46 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void OnBrightnessReceived(int brightness)
+    private void OnMqttMessageReceived(string topic, string payload)
     {
-        Log($"Recieved Light: {brightness}%");
+        Log($"MQTT Recieve: [{topic}] {payload}");
 
-        // HSV 명도 업데이트
-        if (hsvController != null)
+        // brightness 토픽 처리
+        if (topic.Contains("brightness") || topic.Contains("state"))
         {
-            hsvController.SetBrightnessFromLight(brightness);
-        }
+            // payload에서 brightness 값 추출
+            int brightnessIndex = payload.IndexOf("\"brightness\"");
+            if (brightnessIndex >= 0)
+            {
+                int colonIndex = payload.IndexOf(':', brightnessIndex);
+                string numStr = "";
+                for (int i = colonIndex + 1; i < payload.Length; i++)
+                {
+                    char c = payload[i];
+                    if (char.IsDigit(c))
+                    {
+                        numStr += c;
+                    }
+                    else if (numStr.Length > 0)
+                    {
+                        break;
+                    }
+                }
 
-        SaveCurrentState();
+                if (int.TryParse(numStr, out int brightness))
+                {
+                    Log($"Cloudtype Brightness Recieve: {brightness}%");
+                    
+                    // HSV 명도 업데이트 (그라데이션은 HSVController에서 자동 처리)
+                    if (hsvController != null)
+                    {
+                        hsvController.SetBrightnessFromLight(brightness);
+                    }
+
+                    SaveCurrentState();
+                }
+            }
+        }
     }
 
     private void OnRemoteStateChanged(LampState state)
@@ -451,6 +494,24 @@ public class UIManager : MonoBehaviour
         UpdateConnectionStatus();
     }
 
+    private void OnFirebaseConnectionChanged(bool connected)
+    {
+        Log($"Firebase Connection Changed: {connected}");
+        UpdateConnectionStatus();
+    }
+
+    private void OnMqttConnected()
+    {
+        Log("MQTT Connected");
+        UpdateConnectionStatus();
+    }
+
+    private void OnMqttDisconnected()
+    {
+        Log("MQTT Disconnected");
+        UpdateConnectionStatus();
+    }
+
     #endregion
 
     #region UI Updates
@@ -470,9 +531,12 @@ public class UIManager : MonoBehaviour
 
     private void UpdateConnectionStatus()
     {
+        // 1. 연결 상태 확인
         bool serialConnected = serialController != null && serialController.IsConnected;
         bool firebaseConnected = firebaseManager != null && firebaseManager.IsConnected;
+        bool mqttConnected = mqttManager != null && mqttManager.IsConnected;  // ← MQTT 상태 추가
 
+        // 2. 아이콘 색상 업데이트 (Serial과 Firebase만 있으므로, MQTT 아이콘은 생략)
         if (serialStatusIcon != null)
         {
             serialStatusIcon.color = serialConnected ? connectedColor : disconnectedColor;
@@ -483,11 +547,20 @@ public class UIManager : MonoBehaviour
             firebaseStatusIcon.color = firebaseConnected ? connectedColor : disconnectedColor;
         }
 
+        // 3. 텍스트 상태 업데이트
         if (connectionText != null)
         {
             string status = "";
-            status += serialConnected ? "● Serial        " : "○ Serial        ";
-            status += firebaseConnected ? "● Firebase" : "○ Firebase";
+            
+            // Serial 상태
+            status += serialConnected ? "● Serial   " : "○ Serial   ";
+            
+            // Firebase 상태
+            status += firebaseConnected ? "● Firebase   " : "○ Firebase   ";
+            
+            // MQTT 상태 추가
+            status += mqttConnected ? "● MQTT" : "○ MQTT";  // ← MQTT 상태 추가
+            
             connectionText.text = status;
         }
     }

@@ -11,8 +11,8 @@ using System.Text;
 public class ClaudeManager : MonoBehaviour
 {
     [Header("API Settings")]
-    [SerializeField] private string apiKey = "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";
-    [SerializeField] private string model = "claude-opus-4-5";
+    [SerializeField] private string apiKey = "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";
+    [SerializeField] private string model = "claude-opus-4-5-20251101";
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -141,7 +141,7 @@ You must respond only in the JSON format below. Output JSON only, with no additi
 {{
   ""emotion"": ""joy|sadness|anger|calm|excited|fear|surprise"",
   ""hue"": 0-360,
-  ""summary"": ""Korean summary within 20 characters""
+  ""summary"": ""English summary within 20 characters""
 }}
 
 emotion–hue mapping:

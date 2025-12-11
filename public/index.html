@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmoLamp 원격 제어</title>
+    <title>EmoLamp Dashboard</title>
     <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --accent: #4fc3dc;
+            --border: rgba(255,255,255,0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,500 +22,782 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            color: #fff;
-            padding: 20px;
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-
-        h1 span {
-            font-size: 2.5rem;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
-            color: #a0a0a0;
-        }
-
-        .status-row {
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .status-row:last-child {
-            border-bottom: none;
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .status-label {
-            color: #a0a0a0;
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
 
-        .status-value {
-            font-weight: bold;
-            font-size: 1.1rem;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
         }
 
-        .color-preview {
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: auto auto 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Current State Card */
+        .current-state {
+            grid-row: span 2;
+            text-align: center;
+        }
+
+        .lamp-preview {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            margin: 20px auto;
-            box-shadow: 0 0 60px var(--glow-color, #50C878);
-            transition: all 0.3s ease;
-        }
-
-        .mode-toggle {
+            margin: 1rem auto;
+            background: #50C878;
+            box-shadow: 0 0 60px rgba(80, 200, 120, 0.5);
+            transition: all 0.5s ease;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .mode-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: transparent;
-            color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
+        .lamp-emoji {
+            font-size: 4rem;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
+        }
+
+        .emotion-label {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .color-hex {
+            font-family: monospace;
             font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .state-details {
+            margin-top: 1.5rem;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .state-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .state-row:last-child {
+            border-bottom: none;
+        }
+
+        .state-label {
+            color: var(--text-secondary);
+        }
+
+        .state-value {
+            font-weight: 500;
+        }
+
+        /* Timeline Card */
+        .timeline-card {
+            grid-column: 2;
+        }
+
+        .timeline-container {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .timeline-hour {
+            flex: 1;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .timeline-bar {
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
             transition: all 0.3s;
         }
 
-        .mode-btn.active {
-            background: rgba(255,255,255,0.2);
-            border-color: #fff;
+        .timeline-bar.active {
+            background: var(--accent);
         }
 
-        .mode-btn:hover {
-            background: rgba(255,255,255,0.1);
+        .timeline-bar.has-data {
+            box-shadow: 0 0 10px rgba(79, 195, 220, 0.3);
         }
 
-        .slider-group {
-            margin-bottom: 20px;
+        .timeline-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
 
-        .slider-label {
+        /* Distribution Card */
+        .distribution-card {
+            grid-column: 2;
+        }
+
+        .chart-container {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            align-items: center;
+            gap: 2rem;
         }
 
-        .slider {
+        .donut-chart {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            flex-shrink: 0;
+        }
+
+        .donut-chart svg {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            outline: none;
+            height: 100%;
+            transform: rotate(-90deg);
         }
 
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        .donut-segment {
+            fill: none;
+            stroke-width: 30;
+            transition: all 0.5s ease;
         }
 
-        #hueSlider {
-            background: linear-gradient(to right, 
-                hsl(0, 100%, 50%), 
-                hsl(60, 100%, 50%), 
-                hsl(120, 100%, 50%), 
-                hsl(180, 100%, 50%), 
-                hsl(240, 100%, 50%), 
-                hsl(300, 100%, 50%), 
-                hsl(360, 100%, 50%)
-            );
-        }
-
-        #satSlider {
-            background: linear-gradient(to right, #808080, #ff0000);
-        }
-
-        #brightSlider {
-            background: linear-gradient(to right, #000, #fff);
-        }
-
-        .apply-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .apply-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .apply-btn:active {
-            transform: translateY(0);
-        }
-
-        .connection-status {
+        .donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
-            padding: 8px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
         }
 
-        .connected {
-            background: rgba(80, 200, 120, 0.2);
-            color: #50C878;
-        }
-
-        .disconnected {
-            background: rgba(255, 100, 100, 0.2);
-            color: #ff6464;
-        }
-
-        .emoji {
+        .donut-total {
             font-size: 2rem;
+            font-weight: 700;
         }
 
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5rem;
+        .donut-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .legend-text {
+            flex: 1;
+        }
+
+        .legend-emotion {
+            font-size: 0.875rem;
+        }
+
+        .legend-percent {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Recent Logs Card */
+        .recent-card {
+            grid-column: 1;
+        }
+
+        .log-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+
+        .log-item:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .log-emoji {
+            font-size: 1.5rem;
+        }
+
+        .log-color {
+            width: 8px;
+            height: 40px;
+            border-radius: 4px;
+        }
+
+        .log-content {
+            flex: 1;
+        }
+
+        .log-emotion {
+            font-weight: 500;
+        }
+
+        .log-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Summary Card */
+        .summary-card {
+            grid-column: 2;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-item {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
             }
-            h1 span {
-                font-size: 2rem;
+
+            .current-state {
+                grid-row: auto;
             }
+
+            .timeline-card,
+            .distribution-card,
+            .summary-card {
+                grid-column: 1;
+            }
+
+            .chart-container {
+                flex-direction: column;
+            }
+
+            .donut-chart {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
             .card {
-                padding: 16px;
+                padding: 1rem;
             }
+
+            .lamp-preview {
+                width: 120px;
+                height: 120px;
+            }
+
+            .lamp-emoji {
+                font-size: 3rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><span>💡</span> EmoLamp 원격 제어</h1>
-
-        <div class="connection-status" id="connectionStatus">
-            연결 중...
+    <header class="header">
+        <h1>🌈 EmoLamp Dashboard</h1>
+        <div class="status-badge">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">연결됨</span>
         </div>
+    </header>
 
+    <main class="container">
         <!-- 현재 상태 -->
-        <div class="card">
-            <h2>📊 현재 상태</h2>
-            <div class="color-preview" id="colorPreview"></div>
-            <div class="status-row">
-                <span class="status-label">모드</span>
-                <span class="status-value" id="currentMode">AUTO</span>
+        <section class="card current-state">
+            <div class="card-title">현재 상태</div>
+            <div class="lamp-preview" id="lampPreview">
+                <span class="lamp-emoji" id="currentEmoji">😌</span>
             </div>
-            <div class="status-row">
-                <span class="status-label">감정</span>
-                <span class="status-value" id="currentEmotion">😌 평온</span>
-            </div>
-            <div class="status-row">
-                <span class="status-label">날씨</span>
-                <span class="status-value" id="currentWeather">-</span>
-            </div>
-            <div class="status-row">
-                <span class="status-label">HSV</span>
-                <span class="status-value" id="currentHSV">H:120 S:70 V:70</span>
-            </div>
-        </div>
-
-        <!-- 제어 패널 -->
-        <div class="card">
-            <h2>🎮 LED 제어</h2>
+            <div class="emotion-label" id="currentEmotion">평온</div>
+            <div class="color-hex" id="currentHex">#50C878</div>
             
-            <div class="mode-toggle">
-                <button class="mode-btn active" id="autoBtn" onclick="setMode('AUTO')">AUTO</button>
-                <button class="mode-btn" id="manualBtn" onclick="setMode('MANUAL')">MANUAL</button>
-            </div>
-
-            <div id="manualControls">
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>색감 (Hue)</span>
-                        <span id="hueValue">120°</span>
-                    </div>
-                    <input type="range" class="slider" id="hueSlider" min="0" max="360" value="120">
+            <div class="state-details">
+                <div class="state-row">
+                    <span class="state-label">모드</span>
+                    <span class="state-value" id="currentMode">AUTO</span>
                 </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>채도 (Saturation)</span>
-                        <span id="satValue">70%</span>
-                    </div>
-                    <input type="range" class="slider" id="satSlider" min="0" max="100" value="70">
+                <div class="state-row">
+                    <span class="state-label">Hue</span>
+                    <span class="state-value" id="currentHue">120°</span>
                 </div>
-
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>밝기 (Brightness)</span>
-                        <span id="brightValue">70%</span>
-                    </div>
-                    <input type="range" class="slider" id="brightSlider" min="0" max="100" value="70">
+                <div class="state-row">
+                    <span class="state-label">채도</span>
+                    <span class="state-value" id="currentSat">70%</span>
                 </div>
-
-                <button class="apply-btn" onclick="applyColor()">
-                    🚀 색상 적용
-                </button>
+                <div class="state-row">
+                    <span class="state-label">명도</span>
+                    <span class="state-value" id="currentBright">70%</span>
+                </div>
+                <div class="state-row">
+                    <span class="state-label">날씨</span>
+                    <span class="state-value" id="currentWeather">-</span>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 빠른 감정 선택 -->
-        <div class="card">
-            <h2>🎭 빠른 감정 선택</h2>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                <button class="mode-btn" onclick="setEmotion('joy', 50)">😊<br>기쁨</button>
-                <button class="mode-btn" onclick="setEmotion('sadness', 220)">😢<br>슬픔</button>
-                <button class="mode-btn" onclick="setEmotion('anger', 0)">😠<br>분노</button>
-                <button class="mode-btn" onclick="setEmotion('calm', 120)">😌<br>평온</button>
-                <button class="mode-btn" onclick="setEmotion('excited', 30)">🤩<br>설렘</button>
-                <button class="mode-btn" onclick="setEmotion('fear', 280)">😨<br>두려움</button>
-                <button class="mode-btn" onclick="setEmotion('surprise', 60)">😲<br>놀람</button>
-                <button class="mode-btn" onclick="setEmotion('neutral', 180)">😐<br>중립</button>
+        <!-- 타임라인 -->
+        <section class="card timeline-card">
+            <div class="card-title">오늘의 감정 타임라인</div>
+            <div class="timeline-container" id="timeline">
+                <!-- JS로 생성 -->
             </div>
-        </div>
-    </div>
+        </section>
+
+        <!-- 감정 분포 -->
+        <section class="card distribution-card">
+            <div class="card-title">감정 분포</div>
+            <div class="chart-container">
+                <div class="donut-chart">
+                    <svg viewBox="0 0 100 100" id="donutChart">
+                        <!-- JS로 생성 -->
+                    </svg>
+                    <div class="donut-center">
+                        <div class="donut-total" id="totalCount">0</div>
+                        <div class="donut-label">총 분석</div>
+                    </div>
+                </div>
+                <div class="legend" id="legend">
+                    <!-- JS로 생성 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 최근 기록 -->
+        <section class="card recent-card">
+            <div class="card-title">최근 기록</div>
+            <div class="log-list" id="recentLogs">
+                <!-- JS로 생성 -->
+            </div>
+        </section>
+
+        <!-- 누적 통계 -->
+        <section class="card summary-card">
+            <div class="card-title">누적 통계</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value" id="summaryTotal">0</div>
+                    <div class="summary-label">총 분석 횟수</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="summaryToday">0</div>
+                    <div class="summary-label">오늘 분석</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="summaryTopEmotion">😌</div>
+                    <div class="summary-label">최다 감정</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="summaryAvgHue">120°</div>
+                    <div class="summary-label">평균 Hue</div>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script>
-        // 서버 URL (같은 도메인)
-        const API_BASE = '';
-        
-        let currentState = {
-            mode: 'AUTO',
-            hue: 120,
-            saturation: 70,
-            brightness: 70
+        // 감정별 색상
+        const emotionColors = {
+            joy: '#FFD700',
+            sadness: '#4169E1',
+            anger: '#DC143C',
+            calm: '#50C878',
+            excited: '#FF8C00',
+            fear: '#9932CC',
+            surprise: '#FFFF00'
         };
+
+        // API 기본 URL
+        const API_BASE = '';
+
+        // 데이터 저장
+        let currentData = {};
+        let timelineData = [];
+        let distributionData = [];
+        let recentData = [];
 
         // 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            setupSliders();
-            fetchState();
-            setInterval(fetchState, 3000); // 3초마다 상태 갱신
+            initTimeline();
+            fetchAllData();
+            // 5초마다 업데이트
+            setInterval(fetchAllData, 5000);
         });
 
-        // 슬라이더 이벤트 설정
-        function setupSliders() {
-            const hueSlider = document.getElementById('hueSlider');
-            const satSlider = document.getElementById('satSlider');
-            const brightSlider = document.getElementById('brightSlider');
-
-            hueSlider.addEventListener('input', (e) => {
-                document.getElementById('hueValue').textContent = e.target.value + '°';
-                updatePreview();
-            });
-
-            satSlider.addEventListener('input', (e) => {
-                document.getElementById('satValue').textContent = e.target.value + '%';
-                updatePreview();
-            });
-
-            brightSlider.addEventListener('input', (e) => {
-                document.getElementById('brightValue').textContent = e.target.value + '%';
-                updatePreview();
-            });
+        // 타임라인 초기화
+        function initTimeline() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 24; i++) {
+                const hour = document.createElement('div');
+                hour.className = 'timeline-hour';
+                hour.innerHTML = `
+                    <div class="timeline-bar" id="hour-${i}"></div>
+                    <div class="timeline-label">${i.toString().padStart(2, '0')}</div>
+                `;
+                container.appendChild(hour);
+            }
         }
 
-        // 미리보기 업데이트
-        function updatePreview() {
-            const h = document.getElementById('hueSlider').value;
-            const s = document.getElementById('satSlider').value;
-            const v = document.getElementById('brightSlider').value;
-
-            const color = hsvToHex(h, s, v);
-            const preview = document.getElementById('colorPreview');
-            preview.style.background = color;
-            preview.style.setProperty('--glow-color', color);
-        }
-
-        // 서버에서 상태 가져오기
-        async function fetchState() {
+        // 모든 데이터 가져오기
+        async function fetchAllData() {
             try {
-                const response = await fetch(API_BASE + '/api/state');
-                if (response.ok) {
-                    const state = await response.json();
-                    updateUI(state);
-                    setConnectionStatus(true);
-                } else {
-                    setConnectionStatus(false);
-                }
+                await Promise.all([
+                    fetchCurrent(),
+                    fetchTimeline(),
+                    fetchDistribution(),
+                    fetchRecent(),
+                    fetchSummary()
+                ]);
+                updateStatus(true);
             } catch (error) {
                 console.error('Fetch error:', error);
-                setConnectionStatus(false);
+                updateStatus(false);
             }
         }
 
-        // UI 업데이트
-        function updateUI(state) {
-            currentState = state;
-
-            // 모드
-            document.getElementById('currentMode').textContent = state.mode;
-            document.getElementById('autoBtn').classList.toggle('active', state.mode === 'AUTO');
-            document.getElementById('manualBtn').classList.toggle('active', state.mode === 'MANUAL');
-
-            // 감정
-            const emotionMap = {
-                'joy': '😊 기쁨',
-                'sadness': '😢 슬픔',
-                'anger': '😠 분노',
-                'calm': '😌 평온',
-                'excited': '🤩 설렘',
-                'fear': '😨 두려움',
-                'surprise': '😲 놀람'
-            };
-            document.getElementById('currentEmotion').textContent = emotionMap[state.emotion] || '😐 중립';
-
-            // 날씨
-            document.getElementById('currentWeather').textContent = state.weather || '-';
-
-            // HSV
-            document.getElementById('currentHSV').textContent = 
-                `H:${state.hue} S:${state.saturation} V:${state.brightness}`;
-
-            // 슬라이더 동기화
-            document.getElementById('hueSlider').value = state.hue;
-            document.getElementById('satSlider').value = state.saturation;
-            document.getElementById('brightSlider').value = state.brightness;
-            document.getElementById('hueValue').textContent = state.hue + '°';
-            document.getElementById('satValue').textContent = state.saturation + '%';
-            document.getElementById('brightValue').textContent = state.brightness + '%';
-
-            // 색상 미리보기
-            const color = hsvToHex(state.hue, state.saturation, state.brightness);
-            const preview = document.getElementById('colorPreview');
-            preview.style.background = color;
-            preview.style.setProperty('--glow-color', color);
+        // 현재 상태
+        async function fetchCurrent() {
+            const res = await fetch(`${API_BASE}/api/stats/current`);
+            const data = await res.json();
+            currentData = data;
+            updateCurrentUI(data);
         }
 
-        // 연결 상태 표시
-        function setConnectionStatus(connected) {
-            const el = document.getElementById('connectionStatus');
-            if (connected) {
-                el.textContent = '● 서버 연결됨';
-                el.className = 'connection-status connected';
+        // 타임라인
+        async function fetchTimeline() {
+            const res = await fetch(`${API_BASE}/api/stats/timeline`);
+            const data = await res.json();
+            timelineData = data.timeline;
+            updateTimelineUI(data.timeline);
+        }
+
+        // 감정 분포
+        async function fetchDistribution() {
+            const res = await fetch(`${API_BASE}/api/stats/emotions`);
+            const data = await res.json();
+            distributionData = data;
+            updateDistributionUI(data);
+        }
+
+        // 최근 기록
+        async function fetchRecent() {
+            const res = await fetch(`${API_BASE}/api/stats/recent?limit=20`);
+            const data = await res.json();
+            recentData = data.logs;
+            updateRecentUI(data.logs);
+        }
+
+        // 요약 통계
+        async function fetchSummary() {
+            const res = await fetch(`${API_BASE}/api/stats/summary`);
+            const data = await res.json();
+            updateSummaryUI(data);
+        }
+
+        // UI 업데이트 함수들
+        function updateCurrentUI(data) {
+            const lamp = document.getElementById('lampPreview');
+            const color = data.colorHex || '#50C878';
+            lamp.style.background = color;
+            lamp.style.boxShadow = `0 0 60px ${color}80`;
+
+            document.getElementById('currentEmoji').textContent = data.emotionEmoji || '😌';
+            document.getElementById('currentEmotion').textContent = data.emotionKorean || '평온';
+            document.getElementById('currentHex').textContent = color;
+            document.getElementById('currentMode').textContent = data.mode || 'AUTO';
+            document.getElementById('currentHue').textContent = `${data.hue || 120}°`;
+            document.getElementById('currentSat').textContent = `${data.saturation || 70}%`;
+            document.getElementById('currentBright').textContent = `${data.brightness || 70}%`;
+            
+            const weather = data.weather 
+                ? `${data.weatherEmoji || ''} ${data.temperature || '-'}°C`
+                : '-';
+            document.getElementById('currentWeather').textContent = weather;
+        }
+
+        function updateTimelineUI(timeline) {
+            const now = new Date().getHours();
+            
+            timeline.forEach(item => {
+                const bar = document.getElementById(`hour-${item.hour}`);
+                if (!bar) return;
+                
+                bar.classList.remove('active', 'has-data');
+                bar.style.background = '';
+                bar.textContent = '';
+                
+                if (item.hour === now) {
+                    bar.classList.add('active');
+                }
+                
+                if (item.emotion && item.count > 0) {
+                    bar.classList.add('has-data');
+                    bar.style.background = item.colorHex || emotionColors[item.emotion];
+                    bar.textContent = item.emoji;
+                }
+            });
+        }
+
+        function updateDistributionUI(data) {
+            const svg = document.getElementById('donutChart');
+            const legend = document.getElementById('legend');
+            
+            document.getElementById('totalCount').textContent = data.total;
+            
+            // 도넛 차트 그리기
+            svg.innerHTML = '';
+            let offset = 0;
+            const radius = 35;
+            const circumference = 2 * Math.PI * radius;
+            
+            if (data.distribution.length === 0) {
+                // 데이터 없을 때
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', '50');
+                circle.setAttribute('cy', '50');
+                circle.setAttribute('r', radius);
+                circle.setAttribute('class', 'donut-segment');
+                circle.setAttribute('stroke', '#333');
+                circle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
+                svg.appendChild(circle);
             } else {
-                el.textContent = '○ 서버 연결 끊김';
-                el.className = 'connection-status disconnected';
-            }
-        }
-
-        // 모드 변경
-        async function setMode(mode) {
-            try {
-                await fetch(API_BASE + '/api/state', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mode })
+                data.distribution.forEach(item => {
+                    const segmentLength = (item.percentage / 100) * circumference;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', '50');
+                    circle.setAttribute('cy', '50');
+                    circle.setAttribute('r', radius);
+                    circle.setAttribute('class', 'donut-segment');
+                    circle.setAttribute('stroke', emotionColors[item.emotion] || '#666');
+                    circle.setAttribute('stroke-dasharray', `${segmentLength} ${circumference - segmentLength}`);
+                    circle.setAttribute('stroke-dashoffset', -offset);
+                    svg.appendChild(circle);
+                    offset += segmentLength;
                 });
-                fetchState();
-            } catch (error) {
-                console.error('Set mode error:', error);
+            }
+            
+            // 범례
+            legend.innerHTML = data.distribution.map(item => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${emotionColors[item.emotion] || '#666'}"></div>
+                    <div class="legend-text">
+                        <div class="legend-emotion">${item.emoji} ${item.korean}</div>
+                        <div class="legend-percent">${item.percentage}% (${item.count})</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecentUI(logs) {
+            const container = document.getElementById('recentLogs');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:2rem;">아직 기록이 없습니다</div>';
+                return;
+            }
+            
+            container.innerHTML = logs.map(log => `
+                <div class="log-item">
+                    <div class="log-color" style="background: ${log.colorHex || '#50C878'}"></div>
+                    <div class="log-emoji">${log.emoji}</div>
+                    <div class="log-content">
+                        <div class="log-emotion">${log.emotionKorean}</div>
+                        <div class="log-time">${formatTime(log.timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSummaryUI(data) {
+            document.getElementById('summaryTotal').textContent = data.totalAnalyses;
+            document.getElementById('summaryToday').textContent = data.todayAnalyses;
+            document.getElementById('summaryTopEmotion').textContent = 
+                `${data.topEmotionEmoji} ${data.topEmotionKorean}`;
+            document.getElementById('summaryAvgHue').textContent = `${data.averageHue}°`;
+        }
+
+        function updateStatus(connected) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (connected) {
+                dot.style.background = '#4caf50';
+                text.textContent = '연결됨';
+            } else {
+                dot.style.background = '#f44336';
+                text.textContent = '연결 끊김';
             }
         }
 
-        // 색상 적용
-        async function applyColor() {
-            const h = parseInt(document.getElementById('hueSlider').value);
-            const s = parseInt(document.getElementById('satSlider').value);
-            const v = parseInt(document.getElementById('brightSlider').value);
-
-            try {
-                await fetch(API_BASE + '/api/state', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        mode: 'MANUAL',
-                        hue: h,
-                        saturation: s,
-                        brightness: v,
-                        manualColorHex: hsvToHex(h, s, v)
-                    })
-                });
-                fetchState();
-            } catch (error) {
-                console.error('Apply color error:', error);
-            }
-        }
-
-        // 빠른 감정 선택
-        async function setEmotion(emotion, hue) {
-            try {
-                await fetch(API_BASE + '/api/state', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        mode: 'AUTO',
-                        emotion: emotion,
-                        hue: hue
-                    })
-                });
-                fetchState();
-            } catch (error) {
-                console.error('Set emotion error:', error);
-            }
-        }
-
-        // HSV to HEX 변환
-        function hsvToHex(h, s, v) {
-            h = h / 360;
-            s = s / 100;
-            v = v / 100;
-
-            let r, g, b;
-            const i = Math.floor(h * 6);
-            const f = h * 6 - i;
-            const p = v * (1 - s);
-            const q = v * (1 - f * s);
-            const t = v * (1 - (1 - f) * s);
-
-            switch (i % 6) {
-                case 0: r = v; g = t; b = p; break;
-                case 1: r = q; g = v; b = p; break;
-                case 2: r = p; g = v; b = t; break;
-                case 3: r = p; g = q; b = v; break;
-                case 4: r = t; g = p; b = v; break;
-                case 5: r = v; g = p; b = q; break;
-            }
-
-            const toHex = (x) => {
-                const hex = Math.round(x * 255).toString(16);
-                return hex.length === 1 ? '0' + hex : hex;
-            };
-
-            return '#' + toHex(r) + toHex(g) + toHex(b);
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return '방금 전';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+            
+            return date.toLocaleString('ko-KR', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
     </script>
 </body>
