@@ -13,14 +13,9 @@
             --text-muted: #a0aec0;
             --border: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -30,7 +25,6 @@
             line-height: 1.6;
         }
 
-        /* Header */
         .header {
             background: var(--card-bg);
             padding: 1.5rem 2rem;
@@ -43,7 +37,6 @@
         .header h1 {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
         .header h1 span {
@@ -68,7 +61,6 @@
             background: #48bb78;
         }
 
-        /* Main Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -78,7 +70,6 @@
             gap: 2rem;
         }
 
-        /* Cards */
         .card {
             background: var(--card-bg);
             border-radius: 16px;
@@ -96,7 +87,6 @@
         .card-title {
             font-size: 1rem;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
         .card-subtitle {
@@ -104,7 +94,7 @@
             color: var(--text-muted);
         }
 
-        /* Current State Card */
+        /* Current State */
         .current-state-card {
             display: flex;
             align-items: center;
@@ -113,7 +103,6 @@
         }
 
         .lamp-visual {
-            position: relative;
             width: 120px;
             height: 120px;
             flex-shrink: 0;
@@ -131,13 +120,9 @@
             transition: all 0.5s ease;
         }
 
-        .lamp-emoji {
-            font-size: 3rem;
-        }
+        .lamp-emoji { font-size: 3rem; }
 
-        .state-info {
-            flex: 1;
-        }
+        .state-info { flex: 1; }
 
         .state-mode {
             font-size: 0.75rem;
@@ -151,7 +136,6 @@
         .state-label {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
 
@@ -161,20 +145,9 @@
             margin-top: 1rem;
         }
 
-        .state-detail-item {
-            text-align: center;
-        }
-
-        .state-detail-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .state-detail-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
+        .state-detail-item { text-align: center; }
+        .state-detail-value { font-size: 1.25rem; font-weight: 600; }
+        .state-detail-label { font-size: 0.75rem; color: var(--text-muted); }
 
         .auto-mode-display {
             display: flex;
@@ -216,7 +189,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .stat-label {
@@ -225,17 +197,9 @@
             margin-top: 0.25rem;
         }
 
-        /* Area Chart */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 1rem;
-        }
-
-        .chart-svg {
-            width: 100%;
-            height: 100%;
-        }
+        /* Chart */
+        .chart-container { height: 300px; margin-top: 1rem; }
+        .chart-svg { width: 100%; height: 100%; }
 
         .chart-legend {
             display: flex;
@@ -270,7 +234,7 @@
             color: var(--text-muted);
         }
 
-        /* Distribution Section */
+        /* Distribution */
         .distribution-grid {
             display: grid;
             grid-template-columns: 200px 1fr;
@@ -307,7 +271,6 @@
         .donut-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--text-primary);
         }
 
         .donut-label {
@@ -352,10 +315,9 @@
             text-align: right;
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
-        /* Recent List */
+        /* Recent */
         .recent-list {
             display: flex;
             flex-direction: column;
@@ -374,9 +336,7 @@
             transition: transform 0.2s;
         }
 
-        .recent-item:hover {
-            transform: translateX(4px);
-        }
+        .recent-item:hover { transform: translateX(4px); }
 
         .recent-color {
             width: 4px;
@@ -384,85 +344,17 @@
             border-radius: 2px;
         }
 
-        .recent-emoji {
-            font-size: 1.5rem;
-        }
+        .recent-emoji { font-size: 1.5rem; }
+        .recent-content { flex: 1; }
+        .recent-emotion { font-weight: 500; }
+        .recent-time { font-size: 0.75rem; color: var(--text-muted); }
 
-        .recent-content {
-            flex: 1;
-        }
-
-        .recent-emotion {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .recent-time {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        /* Two Column Layout */
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .two-column {
-                grid-template-columns: 1fr;
-            }
-
-            .distribution-grid {
-                grid-template-columns: 1fr;
-                justify-items: center;
-            }
-
-            .current-state-card {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .state-details {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 500px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .chart-container {
-                height: 200px;
-            }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 3rem;
@@ -473,6 +365,23 @@
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .two-column { grid-template-columns: 1fr; }
+            .distribution-grid { grid-template-columns: 1fr; justify-items: center; }
+            .current-state-card { flex-direction: column; text-align: center; }
+            .state-details { justify-content: center; }
+        }
+
+        @media (max-width: 500px) {
+            .container { padding: 1rem; }
+            .chart-container { height: 200px; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -485,14 +394,10 @@
     </header>
 
     <main class="container">
-        <!-- Current State -->
         <div class="card" id="currentStateCard">
-            <div id="currentStateContent">
-                <!-- JS로 동적 생성 -->
-            </div>
+            <div id="currentStateContent"></div>
         </div>
 
-        <!-- Stats Summary -->
         <div class="stats-grid">
             <div class="stat-item">
                 <div class="stat-value" id="statTotal">0</div>
@@ -512,7 +417,6 @@
             </div>
         </div>
 
-        <!-- Timeline Chart -->
         <div class="card">
             <div class="card-header">
                 <div>
@@ -520,89 +424,55 @@
                     <div class="card-subtitle">Today's emotion changes</div>
                 </div>
             </div>
-            <div class="chart-legend" id="chartLegend">
-                <!-- JS로 생성 -->
-            </div>
+            <div class="chart-legend" id="chartLegend"></div>
             <div class="chart-container">
-                <svg class="chart-svg" id="areaChart" viewBox="0 0 800 250" preserveAspectRatio="none">
-                    <!-- JS로 생성 -->
-                </svg>
+                <svg class="chart-svg" id="areaChart" viewBox="0 0 800 250" preserveAspectRatio="none"></svg>
             </div>
-            <div class="chart-labels" id="chartLabels">
-                <!-- JS로 생성 -->
-            </div>
+            <div class="chart-labels" id="chartLabels"></div>
         </div>
 
-        <!-- Two Column: Distribution & Recent -->
         <div class="two-column">
-            <!-- Emotion Distribution -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Emotion Distribution</div>
                 </div>
                 <div class="distribution-grid">
                     <div class="donut-container">
-                        <svg class="donut-svg" viewBox="0 0 100 100" id="donutChart">
-                            <!-- JS로 생성 -->
-                        </svg>
+                        <svg class="donut-svg" viewBox="0 0 100 100" id="donutChart"></svg>
                         <div class="donut-center">
                             <div class="donut-value" id="donutTotal">0</div>
                             <div class="donut-label">Total</div>
                         </div>
                     </div>
-                    <div class="emotion-bars" id="emotionBars">
-                        <!-- JS로 생성 -->
-                    </div>
+                    <div class="emotion-bars" id="emotionBars"></div>
                 </div>
             </div>
 
-            <!-- Recent Logs -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Recent Activity</div>
                 </div>
-                <div class="recent-list" id="recentList">
-                    <!-- JS로 생성 -->
-                </div>
+                <div class="recent-list" id="recentList"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // 감정별 색상 (파스텔톤)
         const emotionColors = {
-            joy: '#FFD93D',
-            sadness: '#6C9BCF',
-            anger: '#FF6B6B',
-            calm: '#6BCB77',
-            excited: '#FF8C42',
-            fear: '#9D65C9',
-            surprise: '#F9F871'
+            joy: '#FFD93D', sadness: '#6C9BCF', anger: '#FF6B6B',
+            calm: '#6BCB77', excited: '#FF8C42', fear: '#9D65C9', surprise: '#F9F871'
         };
-
         const emotionLabels = {
-            joy: 'Joy',
-            sadness: 'Sadness',
-            anger: 'Anger',
-            calm: 'Calm',
-            excited: 'Excited',
-            fear: 'Fear',
-            surprise: 'Surprise'
+            joy: 'Joy', sadness: 'Sadness', anger: 'Anger',
+            calm: 'Calm', excited: 'Excited', fear: 'Fear', surprise: 'Surprise'
         };
-
         const emotionEmojis = {
-            joy: '😊',
-            sadness: '😢',
-            anger: '😡',
-            calm: '😌',
-            excited: '🤩',
-            fear: '😨',
-            surprise: '😲'
+            joy: '😊', sadness: '😢', anger: '😡',
+            calm: '😌', excited: '🤩', fear: '😨', surprise: '😲'
         };
 
         const API_BASE = '';
 
-        // 초기화
         document.addEventListener('DOMContentLoaded', () => {
             fetchAllData();
             setInterval(fetchAllData, 5000);
@@ -611,11 +481,8 @@
         async function fetchAllData() {
             try {
                 await Promise.all([
-                    fetchCurrent(),
-                    fetchSummary(),
-                    fetchTimeline(),
-                    fetchDistribution(),
-                    fetchRecent()
+                    fetchCurrent(), fetchSummary(), fetchTimeline(),
+                    fetchDistribution(), fetchRecent()
                 ]);
                 updateStatus(true);
             } catch (error) {
@@ -624,7 +491,6 @@
             }
         }
 
-        // 현재 상태
         async function fetchCurrent() {
             const res = await fetch(`${API_BASE}/api/stats/current`);
             const data = await res.json();
@@ -633,9 +499,7 @@
 
         function updateCurrentState(data) {
             const container = document.getElementById('currentStateContent');
-            
             if (data.mode === 'AUTO' || !data.mode) {
-                // Auto Mode - 간단히 표시
                 container.innerHTML = `
                     <div class="auto-mode-display">
                         <div>
@@ -645,10 +509,8 @@
                                 Emotion-based automatic color control
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             } else {
-                // Manual Mode - 상세 표시
                 const color = data.colorHex || '#667eea';
                 container.innerHTML = `
                     <div class="current-state-card">
@@ -676,24 +538,19 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
-        // 통계 요약
         async function fetchSummary() {
             const res = await fetch(`${API_BASE}/api/stats/summary`);
             const data = await res.json();
-            
             document.getElementById('statTotal').textContent = data.totalAnalyses;
             document.getElementById('statToday').textContent = data.todayAnalyses;
-            document.getElementById('statTopEmotion').textContent = 
-                `${data.topEmotionEmoji || '😌'}`;
+            document.getElementById('statTopEmotion').textContent = data.topEmotionEmoji || '😌';
             document.getElementById('statAvgHue').textContent = `${data.averageHue}°`;
         }
 
-        // 타임라인 (Area Chart)
         async function fetchTimeline() {
             const res = await fetch(`${API_BASE}/api/stats/timeline`);
             const data = await res.json();
@@ -705,94 +562,62 @@
             const legendContainer = document.getElementById('chartLegend');
             const labelsContainer = document.getElementById('chartLabels');
             
-            // 시간대별 감정 집계
             const emotionsByHour = {};
             const activeEmotions = new Set();
             
             timeline.forEach(item => {
                 if (item.emotion && item.count > 0) {
                     activeEmotions.add(item.emotion);
-                    emotionsByHour[item.hour] = {
-                        emotion: item.emotion,
-                        count: item.count
-                    };
+                    emotionsByHour[item.hour] = { emotion: item.emotion, count: item.count };
                 }
             });
 
-            // 범례 생성
             const emotionList = Array.from(activeEmotions);
-            if (emotionList.length === 0) {
-                legendContainer.innerHTML = '<span style="color: var(--text-muted)">No data yet</span>';
-            } else {
-                legendContainer.innerHTML = emotionList.map(emotion => `
+            legendContainer.innerHTML = emotionList.length === 0 
+                ? '<span style="color: var(--text-muted)">No data yet</span>'
+                : emotionList.map(e => `
                     <div class="legend-item">
-                        <div class="legend-dot" style="background: ${emotionColors[emotion]}"></div>
-                        <span>${emotionEmojis[emotion]} ${emotionLabels[emotion]}</span>
-                    </div>
-                `).join('');
-            }
+                        <div class="legend-dot" style="background: ${emotionColors[e]}"></div>
+                        <span>${emotionEmojis[e]} ${emotionLabels[e]}</span>
+                    </div>`).join('');
 
-            // 시간 라벨
-            const hours = [0, 4, 8, 12, 16, 20, 24];
-            labelsContainer.innerHTML = hours.map(h => 
-                `<span class="chart-label">${h.toString().padStart(2, '0')}:00</span>`
-            ).join('');
+            labelsContainer.innerHTML = [0, 4, 8, 12, 16, 20, 24].map(h => 
+                `<span class="chart-label">${h.toString().padStart(2, '0')}:00</span>`).join('');
 
-            // Area Chart 그리기
-            const width = 800;
-            const height = 250;
-            const padding = 20;
-            
+            const width = 800, height = 250, padding = 20;
             let paths = '';
             
             if (emotionList.length > 0) {
-                emotionList.forEach((emotion, emotionIndex) => {
+                emotionList.forEach(emotion => {
                     const points = [];
-                    
                     for (let hour = 0; hour < 24; hour++) {
                         const x = padding + (hour / 23) * (width - 2 * padding);
                         let y = height - padding;
-                        
-                        if (emotionsByHour[hour] && emotionsByHour[hour].emotion === emotion) {
-                            const intensity = Math.min(emotionsByHour[hour].count * 30, height - 2 * padding);
-                            y = height - padding - intensity;
+                        if (emotionsByHour[hour]?.emotion === emotion) {
+                            y = height - padding - Math.min(emotionsByHour[hour].count * 30, height - 2 * padding);
                         }
-                        
                         points.push({ x, y });
                     }
                     
-                    // Smooth curve path
-                    let pathD = `M ${points[0].x} ${height - padding}`;
-                    pathD += ` L ${points[0].x} ${points[0].y}`;
-                    
+                    let pathD = `M ${points[0].x} ${height - padding} L ${points[0].x} ${points[0].y}`;
                     for (let i = 1; i < points.length; i++) {
-                        const prev = points[i - 1];
-                        const curr = points[i];
-                        const cpx = (prev.x + curr.x) / 2;
-                        pathD += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+                        const cpx = (points[i-1].x + points[i].x) / 2;
+                        pathD += ` C ${cpx} ${points[i-1].y}, ${cpx} ${points[i].y}, ${points[i].x} ${points[i].y}`;
                     }
+                    pathD += ` L ${points[points.length-1].x} ${height - padding} Z`;
                     
-                    pathD += ` L ${points[points.length - 1].x} ${height - padding}`;
-                    pathD += ' Z';
-                    
-                    const color = emotionColors[emotion];
-                    paths += `
-                        <path d="${pathD}" fill="${color}" fill-opacity="0.6" stroke="${color}" stroke-width="2"/>
-                    `;
+                    paths += `<path d="${pathD}" fill="${emotionColors[emotion]}" fill-opacity="0.6" stroke="${emotionColors[emotion]}" stroke-width="2"/>`;
                 });
             }
 
-            // Grid lines
             let gridLines = '';
             for (let i = 0; i <= 4; i++) {
                 const y = padding + (i / 4) * (height - 2 * padding);
                 gridLines += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
             }
-
             svg.innerHTML = gridLines + paths;
         }
 
-        // 감정 분포
         async function fetchDistribution() {
             const res = await fetch(`${API_BASE}/api/stats/emotions`);
             const data = await res.json();
@@ -802,52 +627,36 @@
         function drawDistribution(data) {
             const svg = document.getElementById('donutChart');
             const barsContainer = document.getElementById('emotionBars');
-            
             document.getElementById('donutTotal').textContent = data.total;
 
-            // 도넛 차트
-            const radius = 37;
-            const circumference = 2 * Math.PI * radius;
-            let offset = 0;
-            let segments = '';
+            const radius = 37, circumference = 2 * Math.PI * radius;
+            let offset = 0, segments = '';
 
             if (data.distribution.length === 0) {
                 segments = `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="25"/>`;
             } else {
                 data.distribution.forEach(item => {
                     const length = (item.percentage / 100) * circumference;
-                    const color = emotionColors[item.emotion] || '#e2e8f0';
-                    
-                    segments += `
-                        <circle cx="50" cy="50" r="${radius}" 
-                            class="donut-segment"
-                            stroke="${color}"
-                            stroke-dasharray="${length} ${circumference - length}"
-                            stroke-dashoffset="${-offset}"/>
-                    `;
+                    segments += `<circle cx="50" cy="50" r="${radius}" class="donut-segment" 
+                        stroke="${emotionColors[item.emotion] || '#e2e8f0'}"
+                        stroke-dasharray="${length} ${circumference - length}" stroke-dashoffset="${-offset}"/>`;
                     offset += length;
                 });
             }
-
             svg.innerHTML = segments;
 
-            // 바 차트
-            if (data.distribution.length === 0) {
-                barsContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div>No data yet</div>';
-            } else {
-                barsContainer.innerHTML = data.distribution.slice(0, 5).map(item => `
+            barsContainer.innerHTML = data.distribution.length === 0 
+                ? '<div class="empty-state"><div class="empty-icon">📊</div>No data yet</div>'
+                : data.distribution.slice(0, 5).map(item => `
                     <div class="emotion-bar-item">
                         <div class="emotion-bar-label">${emotionEmojis[item.emotion]} ${emotionLabels[item.emotion]}</div>
                         <div class="emotion-bar-track">
                             <div class="emotion-bar-fill" style="width: ${item.percentage}%; background: ${emotionColors[item.emotion]}"></div>
                         </div>
                         <div class="emotion-bar-value">${item.percentage}%</div>
-                    </div>
-                `).join('');
-            }
+                    </div>`).join('');
         }
 
-        // 최근 기록
         async function fetchRecent() {
             const res = await fetch(`${API_BASE}/api/stats/recent?limit=10`);
             const data = await res.json();
@@ -856,47 +665,30 @@
 
         function updateRecentList(logs) {
             const container = document.getElementById('recentList');
-            
-            if (logs.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>No activity yet</div>';
-                return;
-            }
-
-            container.innerHTML = logs.map(log => `
-                <div class="recent-item">
-                    <div class="recent-color" style="background: ${log.colorHex || emotionColors[log.emotion]}"></div>
-                    <div class="recent-emoji">${log.emoji || emotionEmojis[log.emotion]}</div>
-                    <div class="recent-content">
-                        <div class="recent-emotion">${log.emotionKorean || emotionLabels[log.emotion]}</div>
-                        <div class="recent-time">${formatTime(log.timestamp)}</div>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = logs.length === 0 
+                ? '<div class="empty-state"><div class="empty-icon">📝</div>No activity yet</div>'
+                : logs.map(log => `
+                    <div class="recent-item">
+                        <div class="recent-color" style="background: ${log.colorHex || emotionColors[log.emotion]}"></div>
+                        <div class="recent-emoji">${log.emoji || emotionEmojis[log.emotion]}</div>
+                        <div class="recent-content">
+                            <div class="recent-emotion">${log.emotionKorean || emotionLabels[log.emotion]}</div>
+                            <div class="recent-time">${formatTime(log.timestamp)}</div>
+                        </div>
+                    </div>`).join('');
         }
 
         function updateStatus(connected) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            
-            dot.style.background = connected ? '#48bb78' : '#fc8181';
-            text.textContent = connected ? 'Connected' : 'Disconnected';
+            document.getElementById('statusDot').style.background = connected ? '#48bb78' : '#fc8181';
+            document.getElementById('statusText').textContent = connected ? 'Connected' : 'Disconnected';
         }
 
         function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            
+            const diff = Date.now() - timestamp;
             if (diff < 60000) return 'Just now';
             if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
             if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-            
-            return date.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            return new Date(timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
     </script>
 </body>
